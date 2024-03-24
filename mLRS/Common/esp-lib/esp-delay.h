@@ -20,10 +20,19 @@ static inline void delay_ns(uint32_t ns)
 {
     // This may need some kind of reset to avoid overflowing (28 seconds)
     // ESP.reset();
+#ifdef ESP8266
     uint32_t targetCycles = ESP.getCycleCount() + (ns * cyclesPerNs);
     while (ESP.getCycleCount() <= targetCycles){
         continue;
     }
+#else
+    // We need something here for the ESP32
+    // the getcyclecount causes crashes.
+    for (int i = 0; i < 20 ; i++) {
+        __NOP();
+    }
+#endif
+
 }
 
 static inline void delay_us(uint32_t us)

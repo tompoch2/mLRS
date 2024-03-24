@@ -890,8 +890,9 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
     //-- Store parameters
 
     if (doParamsStore) {
-        sx.SetToIdle();
-        sx2.SetToIdle();
+        Serial.println("BOUND");
+        //sx.SetToIdle();
+        //sx2.SetToIdle();
         leds.SetToParamStore();
         setup_store_to_EEPROM();
 #if defined(ESP8266) || defined(ESP32)

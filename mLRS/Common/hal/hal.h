@@ -216,6 +216,10 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #include "esp/rx-hal-dev-sx1278-esp8266.h"
 #endif
 
+#ifdef RX_DEVBOARD_ESP32_900
+#include "esp/rx-hal-dev-sx1278-esp32.h"
+#endif
+
 #ifdef RX_GENERIC_900_ESP8285
 #include "esp/rx-hal-generic-900-esp8285.h"
 #endif

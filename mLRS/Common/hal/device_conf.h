@@ -304,6 +304,13 @@ The default selection of frequency bands can be overruled by feature defines.
   #define FREQUENCY_BAND_915_MHZ_FCC
 #endif
 
+#ifdef RX_DEVBOARD_ESP32_900
+  #define DEVICE_NAME "DEVBOARD ESP32 900"
+  #define DEVICE_IS_RECEIVER
+  #define DEVICE_HAS_SX127x
+  #define FREQUENCY_BAND_915_MHZ_FCC
+#endif
+
 #ifdef RX_GENERIC_900_ESP8285
   #define DEVICE_NAME "GENERIC 900"
   #define DEVICE_IS_RECEIVER
