@@ -8,23 +8,23 @@
 //********************************************************
 
 //-------------------------------------------------------
-// DEVBOARD 900 RX
+// DEVBOARD 900 RX ESP32
 //
-// Uses a Lolin Node MCU V3 ESP8266 Devboard and a SX1276 module
+// Uses a ESP32-PICO-KIT Devboard and a SX1276 module
 // 
-// Could use other ESP8266 devboards 
+// Could use other ESP32 devboards 
 //
-// https://www.aliexpress.com/item/1005005077804800.html
+// https://my-esp-idf.readthedocs.io/en/latest/get-started/get-started-pico-kit.html
 // https://www.aliexpress.com/item/32962551530.html
 //
 // 3v  ->  Vcc
 // G   ->  GND
-// D8  ->  NSS
-// D7  ->  MOSI
-// D6  ->  MISO
-// D5  ->  SCK
-// D2  ->  REST
-// D1  ->  DIO0 
+// 27  ->  NSS
+// 32  ->  MOSI
+// 33  ->  MISO
+// 25  ->  SCK
+// 26  ->  REST
+// 27  ->  DIO0 
 //
 //-------------------------------------------------------
 
