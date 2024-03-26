@@ -28,8 +28,6 @@
 //
 //-------------------------------------------------------
 
-#define __NOP() __asm__("nop")
-
 #define DEVICE_HAS_SINGLE_LED
 #define DEVICE_HAS_SYSTEMBOOT
 #define DEVICE_HAS_SERIAL_OR_DEBUG

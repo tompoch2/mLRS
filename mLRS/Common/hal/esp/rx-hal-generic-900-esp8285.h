@@ -88,6 +88,13 @@ void sx_dio_enable_exti_isr(void)
 
 void sx_dio_exti_isr_clearflag(void) {}
 
+void __disable_irq(void){
+    detachInterrupt(SX_DIO0);
+}
+
+void __enable_irq(void){
+    attachInterrupt(SX_DIO0, SX_DIO_EXTI_IRQHandler, RISING);
+}
 
 //-- Button
 
