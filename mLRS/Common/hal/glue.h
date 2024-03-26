@@ -129,3 +129,8 @@ void hal_init(void)
 
 
 #define IRAM_ATTR
+
+
+uint8_t restart_controller = 0;
+void main_loop(void);
+int main_main(void) { while(1) main_loop(); }
