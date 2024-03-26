@@ -16,7 +16,7 @@
   #include "ESP8266TimerInterrupt.h"
   ESP8266Timer ITimer;
 #elif defined(ESP32) 
-  hw_timer_t *timer0_cfg = nullptr;
+  hw_timer_t* timer0_cfg = nullptr;
 #endif
 // we use a 10us time base, so that overrun is 655 ms
 // 65 ms would only be 3 packets
