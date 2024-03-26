@@ -498,17 +498,18 @@ static inline bool connected(void)
 }
 
 
-#if defined(ESP8266) || defined(ESP32)
-void setup()
-#else
-int main_main(void)
-#endif
+void main_loop(void)
 {
 #ifdef BOARD_TEST_H
     main_test();
 #endif
+if(restart_controller <= 1){//init
+if(restart_controller == 0){//init once
+
     stack_check_init();
-RESTARTCONTROLLER:
+
+}//end of init once
+
     init_hw();
     DBG_MAIN(dbg.puts("DBG1: Init complete\n"));
 
@@ -557,13 +558,9 @@ RESTARTCONTROLLER:
 
     DBG_MAIN(dbg.puts("DBG2: Starting loop\n"));
 
-#if defined(ESP8266) || defined(ESP32)
-}//end of setup
-void loop() 
-{
-#else    
-  while (1) {
-#endif
+restart_controller = UINT8_MAX;
+}//end of init
+
     //-- SysTask handling
 
     if (doSysTask) {
@@ -851,11 +848,7 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
         doPostReceive2_cnt = 5; // postpone this few loops, to allow link_state changes to be handled
     }//end of if(doPostReceive)
 
-#if defined(ESP8266) || defined(ESP32)
     if (link_state != link_state_before) return; // link state has changed, so process immediately
-#else
-    if (link_state != link_state_before) continue; // link state has changed, so process immediately
-#endif    
 
     //-- Update channels, Out handling, etc
 
@@ -890,21 +883,13 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
     //-- Store parameters
 
     if (doParamsStore) {
-        Serial.println("BOUND");
-        //sx.SetToIdle();
-        //sx2.SetToIdle();
+        dbg.puts("BOUND");
+        sx.SetToIdle();
+        sx2.SetToIdle();
         leds.SetToParamStore();
         setup_store_to_EEPROM();
-#if defined(ESP8266) || defined(ESP32)
-        resetFunc(); //call reset
-#else
-        goto RESTARTCONTROLLER;
-#endif
+        restart_controller = 1;
+        return;
     }
 
-#if defined(ESP8266) || defined(ESP32)
 }//end of loop
-#else
-  }//end of while(1) loop
-}//end of main
-#endif

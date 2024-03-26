@@ -41,23 +41,29 @@ void resetFunc(void)
 #endif
 
 
-void __disable_irq(void);
-// {
+void __disable_irq(void)
+{
 //     noInterrupts();
-// }
+}
 
 
-void __enable_irq(void);
-// {
+void __enable_irq(void)
+{
 //     interrupts();
-// }
+}
 
 
-// https://forum.arduino.cc/t/very-short-delays/43445
-#define __NOP() __asm__("nop")
+#define __NOP()  _NOP()
 
 
 void hal_init(void)
 {
     WiFi.mode(WIFI_OFF);
 }
+
+
+
+uint8_t restart_controller = 0;
+void setup() {}
+void main_loop(void);
+void loop() { main_loop(); }
