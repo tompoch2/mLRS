@@ -16,7 +16,7 @@
   #include "ESP8266TimerInterrupt.h"
   ESP8266Timer ITimer;
 #elif defined(ESP32) 
-  hw_timer_t *Timer0_Cfg = NULL;
+  hw_timer_t *timer0_cfg = nullptr;
 #endif
 // we use a 10us time base, so that overrun is 655 ms
 // 65 ms would only be 3 packets
@@ -40,11 +40,7 @@ volatile uint32_t MS_C = 0;
 //-------------------------------------------------------
 
 IRQHANDLER(
-#if defined(ESP8266)
 IRAM_ATTR void CLOCK_IRQHandler(void)
-#elif defined(ESP32)
-IRAM_ATTR void CLOCK_IRQHandler()
-#endif
 {
     CNT_10us++;
 
@@ -84,10 +80,10 @@ void RxClockBase::Init(uint16_t period_ms)
 {
     CLOCK_PERIOD_10US = period_ms * 100; // frame rate in units of 10us
     doPostReceive = false;
-    Timer0_Cfg = timerBegin(0, 800, 1);  // Timer 0, APB clock is 80 Mhz | divide by 80 is 100 KHz / 10 us, count up
-    timerAttachInterrupt(Timer0_Cfg, &CLOCK_IRQHandler, true);
-    timerAlarmWrite(Timer0_Cfg, 1, true);
-    timerAlarmEnable(Timer0_Cfg);
+    timer0_cfg = timerBegin(0, 800, 1);  // Timer 0, APB clock is 80 Mhz | divide by 80 is 100 KHz / 10 us, count up
+    timerAttachInterrupt(timer0_cfg, &CLOCK_IRQHandler, true);
+    timerAlarmWrite(timer0_cfg, 1, true);
+    timerAlarmEnable(timer0_cfg);
     Reset();
 }
 
