@@ -41,10 +41,10 @@ void resetFunc(void)
 #endif
 
 
-void __disable_irq(void);
+void __disable_irq(void) {}
 
 
-void __enable_irq(void);
+void __enable_irq(void) {}
 
 
 #define __NOP()  _NOP()
