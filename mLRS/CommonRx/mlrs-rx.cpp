@@ -861,6 +861,7 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
         doPostReceive2_cnt = 5; // postpone this few loops, to allow link_state changes to be handled
     }//end of if(doPostReceive)
 
+    if (irq_dio || irq2_dio) return; // dio isr pending, so process immediately
     if (link_state != link_state_before) return; // link state has changed, so process immediately
 
     //-- Update channels, Out handling, etc
