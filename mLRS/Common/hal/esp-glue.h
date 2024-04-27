@@ -23,6 +23,7 @@ void __disable_irq(void) {}
 void __enable_irq(void) {}
 
 
+// that's to provide pieces from STM32 HAL used in the code
 #define HAL_I2C_MODULE_ENABLED
 typedef enum
 {
