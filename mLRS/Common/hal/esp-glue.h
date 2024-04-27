@@ -5,6 +5,10 @@
 //*******************************************************
 // ESP Glue
 //*******************************************************
+#ifndef ESP_GLUE_H
+#define ESP_GLUE_H
+#pragma once
+
 
 #include <Arduino.h>
 
@@ -19,9 +23,18 @@ void __disable_irq(void) {}
 void __enable_irq(void) {}
 
 
+#define HAL_I2C_MODULE_ENABLED
+typedef enum
+{
+    HAL_OK       = 0x00U,
+    HAL_ERROR    = 0x01U,
+    HAL_BUSY     = 0x02U,
+    HAL_TIMEOUT  = 0x03U
+} HAL_StatusTypeDef;
+
 
 // setup(), loop() streamlining between Arduino/STM code
-uint8_t restart_controller = 0;
+static uint8_t restart_controller = 0;
 void setup() {}
 void main_loop(void);
 void loop() { main_loop(); }
@@ -39,4 +52,5 @@ void loop() { main_loop(); }
     return;
 
 
+#endif // ESP_GLUE_H
 

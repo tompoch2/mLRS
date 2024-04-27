@@ -6,7 +6,6 @@
 // hal
 //*******************************************************
 
-//#define MLRS_FEATURE_OLED
 
 //-------------------------------------------------------
 // ESP32, ELRS BETAFPV MICRO 1W 2400 TX
@@ -54,6 +53,7 @@
 //#define DEVICE_HAS_NO_COM
 #define DEVICE_HAS_NO_DEBUG
 
+#define DEVICE_HAS_I2C_DISPLAY_ROT180
 #define DEVICE_HAS_FIVEWAY
 
 

@@ -53,6 +53,9 @@
 #include "../Common/esp-lib/esp-uartf.h"
 #endif
 #endif
+#ifdef USE_I2C
+#include "../Common/esp-lib/esp-i2c.h"
+#endif
 #include "../Common/hal/esp-timer.h"
 
 #else
