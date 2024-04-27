@@ -20,9 +20,8 @@ class tTxSxSerial : public tSerialBase
     bool available(void) override;
     char getc(void) override;
 //    void putc(char c) override;
-    void flush(void) override;
-
     void putbuf(void* buf, uint16_t len) override;
+    void flush(void) override;
 
   private:
     tSerialBase* ser;

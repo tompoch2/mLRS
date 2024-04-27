@@ -66,6 +66,7 @@ class tSerialBase
     virtual void Init(void) {}
     virtual void SetBaudRate(uint32_t baud) {}
 //    virtual void putc(char c) {}
+    virtual void putbuf(void* buf, uint16_t len) {}
     virtual bool available(void) { return false; }
     virtual char getc(void) { return '\0'; }
     virtual void flush(void) {}
@@ -73,9 +74,6 @@ class tSerialBase
 
 //    void putbuf(void* buf, uint16_t len) { for (uint16_t i = 0; i < len; i++) putc(((char*)buf)[i]); }
 //    void puts(const char* s) { while (*s) { putc(*s); s++; }; }
-
-    virtual void putbuf(void* buf, uint16_t len) {}
-
     void putc(char c) { putbuf(&c, 1); }
     void puts(const char* s) { putbuf((void*)s, strlen(s)+1); }
 };
