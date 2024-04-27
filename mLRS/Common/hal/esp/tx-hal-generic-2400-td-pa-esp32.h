@@ -14,8 +14,8 @@
 #define DEVICE_HAS_DIVERSITY_SINGLE_SPI // must be set, doesn't work without it
 //#define DEVICE_HAS_JRPIN5
 //#define DEVICE_HAS_IN
-#define DEVICE_HAS_NO_COM
-//#define DEVICE_HAS_NO_DEBUG
+//#define DEVICE_HAS_NO_COM
+#define DEVICE_HAS_NO_DEBUG
 //#define DEVICE_HAS_NO_SERIAL
 
 // #define USE_FEATURE_MAVLINK_PARAMS // has no CLI, no Lua, hence needs this
@@ -34,10 +34,18 @@
 #define UARTB_TXBUFSIZE           1024 // TX_SERIAL_TXBUFSIZE
 #define UARTB_RXBUFSIZE           TX_SERIAL_RXBUFSIZE
 
+#define UARTC_USE_SERIAL1
+#define UARTC_BAUD                115200
+#define UARTC_USE_TX_IO           18 
+#define UARTC_USE_RX_IO           5
+#define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
+#define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
+
 #define UARTF_USE_SERIAL1
 #define UARTF_BAUD                115200
 #define UARTF_USE_TX_IO           18 
 #define UARTF_USE_RX_IO           -1
+#define UARTF_TXBUFSIZE           0 // ?? // 512
 
 
 //-- SX1: SX12xx & SPI

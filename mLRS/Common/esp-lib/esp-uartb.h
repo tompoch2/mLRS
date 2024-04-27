@@ -39,6 +39,8 @@ typedef enum {
   #define UARTB_SERIAL_NO       Serial1
 #elif defined UARTB_USE_SERIAL2
   #define UARTB_SERIAL_NO       Serial2
+#else
+  #error UARTB_SERIAL_NO must be defined!
 #endif
 
 #ifndef UARTB_TXBUFSIZE

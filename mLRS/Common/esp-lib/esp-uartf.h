@@ -15,6 +15,8 @@
   #define UARTF_SERIAL_NO       Serial1
 #elif defined UARTF_USE_SERIAL2
   #define UARTF_SERIAL_NO       Serial2
+#else
+  #error UARTF_SERIAL_NO must be defined!
 #endif
 
 #ifndef UARTF_TXBUFSIZE
