@@ -28,7 +28,7 @@ Definitions:
 
 // Wireless protocol
 // 0 = WiFi TCP, 1 = WiFi UDP, 2 = Wifi UDPCl
-#define WIRELESS_PROTOCOL  1
+#define WIRELESS_PROTOCOL  0
 
 
 //**********************//
