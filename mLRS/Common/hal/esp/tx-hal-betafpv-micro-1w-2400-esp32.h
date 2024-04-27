@@ -317,14 +317,15 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 
 //-- POWER
 
-#define POWER_GAIN_DBM            28 // gain of a PA stage if present
+#define POWER_GAIN_DBM            32 // 28 // gain of a PA stage if present
 #define POWER_SX1280_MAX_DBM      SX1280_POWER_3_DBM  // maximum allowed sx power
 #define POWER_USE_DEFAULT_RFPOWER_CALC
 
-#define RFPOWER_DEFAULT           1 // index into rfpower_list array
+#define RFPOWER_DEFAULT           0 // index into rfpower_list array
 
 const rfpower_t rfpower_list[] = {
-    { .dbm = POWER_10_DBM, .mW = 10 },
+    { .dbm = POWER_MIN, .mW = INT8_MIN },
+    { .dbm = POWER_17_DBM, .mW = 50 },
     { .dbm = POWER_20_DBM, .mW = 100 },
     { .dbm = POWER_24_DBM, .mW = 250 },
     { .dbm = POWER_27_DBM, .mW = 500 },
