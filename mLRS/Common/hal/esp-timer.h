@@ -37,6 +37,11 @@ volatile uint32_t millis32(void)
 #ifdef DEVICE_IS_TRANSMITTER
 // for receiver it is done in esp-rxclock.h, for transmitter it is here
 
+#ifdef ESP32
+static portMUX_TYPE esp32_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static bool systick_millis_initialized = false;
+#endif
+
 #define CLOCK_CNT_1MS             100 // 10us interval 10us x 100 = 1000us        
 
 volatile uint32_t CNT_10us = 0;
@@ -45,23 +50,43 @@ volatile uint32_t MS_C = 0;
 IRQHANDLER(
 void CLOCK_IRQHandler(void)
 {
+/*
     CNT_10us++;
 
     // call HAL_IncTick every 1 ms
     if (CNT_10us == MS_C) {
         MS_C = CNT_10us + CLOCK_CNT_1MS; 
         HAL_IncTick();
-    }
+    } 
+*/
+    HAL_IncTick();
 })
+
 
 void systick_millis_init(void)
 {
     CNT_10us = 0;
     MS_C = CLOCK_CNT_1MS;
 
+    // initialize the timer
+#ifdef ESP32
+    if (systick_millis_initialized) return;
+
+    hw_timer_t* timer0_cfg = nullptr;
+//    timer0_cfg = timerBegin(0, 800, 1);  // Timer 0, APB clock is 80 Mhz | divide by 800 is 100 KHz / 10 us, count up
+    timer0_cfg = timerBegin(0, 80, 1);  // Timer 0, APB clock is 80 Mhz | divide by 80 is 1 MHz / 1 us, count up
+    timerAttachInterrupt(timer0_cfg, &CLOCK_IRQHandler, true);
+//    timerAlarmWrite(timer0_cfg, 1, true);
+    timerAlarmWrite(timer0_cfg, 1000, true);
+    timerAlarmEnable(timer0_cfg);
+
+    systick_millis_initialized = true;
+
+#elif defined ESP8266
     timer1_attachInterrupt(CLOCK_IRQHandler); 
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
     timer1_write(50); // 5 MHz (5 ticks/us - 1677721.4 us max), 50 ticks = 10us
+#endif
 }
 
 #else
