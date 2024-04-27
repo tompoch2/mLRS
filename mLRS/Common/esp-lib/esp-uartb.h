@@ -40,38 +40,38 @@ typedef enum {
 #endif
 
 
-IRAM_ATTR static inline uint16_t uartb_putc(char c)
+IRAM_ATTR uint16_t uartb_putc(char c)
 {
     UARTB_SERIAL_NO.write(c);
     return 1;
 }
 
 
-IRAM_ATTR static inline char uartb_getc(void)
+IRAM_ATTR char uartb_getc(void)
 {
     return (char)UARTB_SERIAL_NO.read();
 }
 
 
-IRAM_ATTR static inline void uartb_rx_flush(void)
+IRAM_ATTR void uartb_rx_flush(void)
 {
     while (UARTB_SERIAL_NO.available() > 0) UARTB_SERIAL_NO.read();
 }
 
 
-IRAM_ATTR static inline void uartb_tx_flush(void)
+IRAM_ATTR void uartb_tx_flush(void)
 {
     UARTB_SERIAL_NO.flush();
 }
 
 
-IRAM_ATTR static inline uint16_t uartb_rx_bytesavailable(void)
+IRAM_ATTR uint16_t uartb_rx_bytesavailable(void)
 {
     return (UARTB_SERIAL_NO.available() > 0) ? UARTB_SERIAL_NO.available() : 0;
 }
 
 
-IRAM_ATTR static inline uint16_t uartb_rx_available(void)
+IRAM_ATTR uint16_t uartb_rx_available(void)
 {
     return (UARTB_SERIAL_NO.available() > 0) ? 1 : 0;
 }

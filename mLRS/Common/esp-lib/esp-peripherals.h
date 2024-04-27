@@ -9,7 +9,7 @@
 #define ESPLIB_PERIPHERALS_H
 
 
-#define GPIO_INLINE_FORCED  IRAM_ATTR static inline __attribute__ ((always_inline))
+#define GPIO_INLINE_FORCED  IRAM_ATTR
 
 // note: ESP32 does not break out every pin, hence the gaps
 

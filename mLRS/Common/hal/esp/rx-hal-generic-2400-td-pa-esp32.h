@@ -54,18 +54,18 @@ void sx_init_gpio(void)
     gpio_init(SX_RESET, IO_MODE_OUTPUT_PP_LOW);
 }
 
-IRAM_ATTR static inline bool sx_busy_read(void)
+IRAM_ATTR bool sx_busy_read(void)
 {
     return (gpio_read_activehigh(SX_BUSY)) ? true : false;
 }
 
-IRAM_ATTR static inline void sx_amp_transmit(void)
+IRAM_ATTR void sx_amp_transmit(void)
 {
     gpio_low(SX_RX_EN);
     gpio_high(SX_TX_EN);
 }
 
-IRAM_ATTR static inline void sx_amp_receive(void)
+IRAM_ATTR void sx_amp_receive(void)
 {
     gpio_low(SX_TX_EN);
     gpio_high(SX_RX_EN);
@@ -105,28 +105,28 @@ void sx2_init_gpio(void)
     gpio_init(SX2_RESET, IO_MODE_OUTPUT_PP_LOW);
 }
 
-IRAM_ATTR static inline void spib_select(void)
+IRAM_ATTR void spib_select(void)
 {
     gpio_low(SX2_CS_IO);
 }
 
-IRAM_ATTR static inline void spib_deselect(void)
+IRAM_ATTR void spib_deselect(void)
 {
     gpio_high(SX2_CS_IO);
 }
 
-IRAM_ATTR static inline bool sx2_busy_read(void)
+IRAM_ATTR bool sx2_busy_read(void)
 {
     return (gpio_read_activehigh(SX2_BUSY)) ? true : false;
 }
 
-IRAM_ATTR static inline void sx2_amp_transmit(void)
+IRAM_ATTR void sx2_amp_transmit(void)
 {
     gpio_low(SX2_RX_EN);
     gpio_high(SX2_TX_EN);
 }
 
-IRAM_ATTR static inline void sx2_amp_receive(void)
+IRAM_ATTR void sx2_amp_receive(void)
 {
     gpio_low(SX2_TX_EN);
     gpio_high(SX2_RX_EN);
