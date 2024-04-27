@@ -3,34 +3,28 @@
 // GPL3
 // https://www.gnu.org/licenses/gpl-3.0.de.html
 //*******************************************************
-// ESP UartB
+// ESP UARTB
 //********************************************************
+#ifndef ESPLIB_UARTB_H
+#define ESPLIB_UARTB_H
 
-// these come from the STM files, not sure if they are needed
-#define LL_USART_PARITY_NONE 1
-#define LL_USART_PARITY_EVEN 1
-#define LL_USART_PARITY_ODD 1
-#define LL_USART_STOPBITS_0_5 1
-#define LL_USART_STOPBITS_1 1
-#define LL_USART_STOPBITS_2 1
+
+#ifndef ESPLIB_UART_ENUMS
+#define ESPLIB_UART_ENUMS
 
 typedef enum {
-    XUART_PARITY_NO = LL_USART_PARITY_NONE, // XUART_xxx to avoid overlap with HAL
-    XUART_PARITY_EVEN = LL_USART_PARITY_EVEN,
-    XUART_PARITY_ODD = LL_USART_PARITY_ODD,
-    XUART_PARITY_MAKEITU32 = UINT32_MAX,
+    XUART_PARITY_NO = 0,
+    XUART_PARITY_EVEN,
+    XUART_PARITY_ODD,
 } UARTPARITYENUM;
 
 typedef enum {
-    UART_STOPBIT_0_5 = LL_USART_STOPBITS_0_5,
-    UART_STOPBIT_1 = LL_USART_STOPBITS_1,
-    UART_STOPBIT_2 = LL_USART_STOPBITS_2,
-    UART_STOPBIT_MAKEITU32 = UINT32_MAX,
+//    UART_STOPBIT_0_5 = 0, // not supported by ESP
+    UART_STOPBIT_1 = 0,
+    UART_STOPBIT_2,
 } UARTSTOPBITENUM;
 
-
-#ifndef ESPLIB_UARTB_H
-#define ESPLIB_UARTB_H
+#endif
 
 
 #ifdef UARTB_USE_SERIAL
@@ -94,15 +88,42 @@ IRAM_ATTR uint16_t uartb_rx_available(void)
 // can be larger than this, and data would thus be lost when put only into the fifo. It is therefore
 // crucial to set a Tx buffer size of sufficient size. setTxBufferSize() is not available for ESP82xx.
 
-void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbits)
+void _uartb_initit(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbits)
 {
-    UARTB_SERIAL_NO.end();
 #ifdef ESP32
     UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
-    UARTB_SERIAL_NO.begin(baud);
+
+    uint32_t config = SERIAL_8N1;
+    switch (parity) {
+        case XUART_PARITY_NO:
+            switch (stopbits) {
+                case UART_STOPBIT_1: config = SERIAL_8N1; break;
+                case UART_STOPBIT_2: config = SERIAL_8N2; break;
+            }
+            break;
+        case XUART_PARITY_EVEN:
+            switch (stopbits) {
+                case UART_STOPBIT_1: config = SERIAL_8E1; break;
+                case UART_STOPBIT_2: config = SERIAL_8E2; break;
+            }
+            break;
+        case XUART_PARITY_ODD:
+            switch (stopbits) {
+                case UART_STOPBIT_1: config = SERIAL_8O1; break;
+                case UART_STOPBIT_2: config = SERIAL_8O2; break;
+            }
+            break;
+    }
+#if defined UARTB_USE_TX_IO || defined UARTB_USE_RX_IO // both need to be defined
+    UARTB_SERIAL_NO.begin(baud, config, UARTB_USE_RX_IO, UARTB_USE_TX_IO);
+#else
+    UARTB_SERIAL_NO.begin(baud, config);
+#endif
+
     UARTB_SERIAL_NO.setRxFIFOFull(8);  // > 57600 baud sets to 120 which is too much, buffer only 127 bytes
     UARTB_SERIAL_NO.setRxTimeout(1);   // wait for 1 symbol (~11 bits) to trigger Rx ISR, default 2
+
 #elif defined ESP8266
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
     UARTB_SERIAL_NO.begin(baud);
@@ -110,18 +131,23 @@ void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM sto
 }
 
 
+void uartb_setbaudrate(uint32_t baud)
+{
+    UARTB_SERIAL_NO.end();
+    _uartb_initit(baud, XUART_PARITY_NO, UART_STOPBIT_1);
+}
+
+
+void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbits)
+{
+    UARTB_SERIAL_NO.end();
+    _uartb_initit(baud, parity, stopbits);
+}
+
+
 void uartb_init(void)
 {
-#ifdef ESP32
-    UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
-    UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
-    UARTB_SERIAL_NO.begin(UARTB_BAUD);
-    UARTB_SERIAL_NO.setRxFIFOFull(8);
-    UARTB_SERIAL_NO.setRxTimeout(1);
-#elif defined ESP8266
-    UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
-    UARTB_SERIAL_NO.begin(UARTB_BAUD);
-#endif
+    _uartb_initit(UARTB_BAUD, XUART_PARITY_NO, UART_STOPBIT_1);
 }
 
 
