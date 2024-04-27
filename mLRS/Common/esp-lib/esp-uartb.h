@@ -34,19 +34,22 @@ typedef enum {
 
 
 #ifdef UARTB_USE_SERIAL
-#define UARTB_SERIAL_NO Serial
+  #define UARTB_SERIAL_NO       Serial
 #elif defined UARTB_USE_SERIAL1
-#define UARTB_SERIAL_NO Serial1
+  #define UARTB_SERIAL_NO       Serial1
+#elif defined UARTB_USE_SERIAL2
+  #define UARTB_SERIAL_NO       Serial2
 #endif
 
-/*
-IRAM_ATTR uint16_t uartb_putc(char c)
-{
-    UARTB_SERIAL_NO.write(c);
-    return 1;
-} */
+#ifndef UARTB_TXBUFSIZE
+  #define UARTB_TXBUFSIZE       256 // MUST be 2^N
+#endif
+#ifndef UARTB_RXBUFSIZE
+  #define UARTB_RXBUFSIZE       256 // MUST be 2^N
+#endif
 
-IRAM_ATTR void uartb_putbuf(void* buf, uint16_t len)
+
+IRAM_ATTR void uartb_putbuf(uint8_t* buf, uint16_t len)
 {
     UARTB_SERIAL_NO.write((uint8_t*)buf, len);
 }
@@ -94,12 +97,13 @@ void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM sto
     UARTB_SERIAL_NO.end();
 #ifdef ESP32
     UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
-#endif
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
     UARTB_SERIAL_NO.begin(baud);
-#ifdef ESP32
     UARTB_SERIAL_NO.setRxFIFOFull(8);  // > 57600 baud sets to 120 which is too much, buffer only 127 bytes
     UARTB_SERIAL_NO.setRxTimeout(1);   // wait for 1 symbol (~11 bits) to trigger Rx ISR, default 2
+#elif defined ESP8266
+    UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
+    UARTB_SERIAL_NO.begin(baud);
 #endif
 }
 
@@ -108,12 +112,13 @@ void uartb_init(void)
 {
 #ifdef ESP32
     UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
-#endif
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
     UARTB_SERIAL_NO.begin(UARTB_BAUD);
-#ifdef ESP32
     UARTB_SERIAL_NO.setRxFIFOFull(8);
     UARTB_SERIAL_NO.setRxTimeout(1);
+#elif defined ESP8266
+    UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
+    UARTB_SERIAL_NO.begin(UARTB_BAUD);
 #endif
 }
 
