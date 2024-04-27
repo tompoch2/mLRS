@@ -277,6 +277,10 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #include "esp/tx-hal-betafpv-micro-1w-2400-esp32.h"
 #endif
 
+#ifdef TX_ELRS_RADIOMASTER_BANDIT_MICRO_900_ESP32
+#include "esp/tx-hal-radiomaster-bandit-micro-900-esp32.h"
+#endif
+
 // -- DIY
 
 #ifdef RX_DIYBOARD_900_ESP8266
