@@ -234,10 +234,10 @@ IRAM_ATTR void led_blue_toggle(void)
 
 //-- Display I2C
 
-#define OLED_SDA                  IO_P22
-#define OLED_SCL                  IO_P32
-#define OLED_I2C_BUFFER_SIZE      1024
-#define OLED_CLOCK_FREQ           1000000L  // fix - rather too much, but helps with LQ, ESP32 max speed
+#define I2C_SDA_IO                IO_P22
+#define I2C_SCL_IO                IO_P32
+#define I2C_CLOCKSPEED            1000000L  // fix - rather too much, but helps with LQ, ESP32 max speed
+#define I2C_BUFFER_SIZE           1024
 
 
 //-- 5 Way Switch
