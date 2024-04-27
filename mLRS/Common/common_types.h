@@ -75,7 +75,7 @@ class tSerialBase
 //    void putbuf(void* buf, uint16_t len) { for (uint16_t i = 0; i < len; i++) putc(((char*)buf)[i]); }
 //    void puts(const char* s) { while (*s) { putc(*s); s++; }; }
     void putc(char c) { putbuf(&c, 1); }
-    void puts(const char* s) { putbuf((void*)s, strlen(s)+1); }
+    void puts(const char* s) { putbuf((void*)s, strlen(s)); }
 };
 
 
