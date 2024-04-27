@@ -12,6 +12,7 @@
 
 
 #include <inttypes.h>
+#include <string.h>
 
 
 #define ARRAY_LEN(x)  sizeof(x)/sizeof(x[0])
@@ -64,14 +65,19 @@ class tSerialBase
     virtual void InitOnce(void) {}
     virtual void Init(void) {}
     virtual void SetBaudRate(uint32_t baud) {}
-    virtual void putc(char c) {}
+//    virtual void putc(char c) {}
     virtual bool available(void) { return false; }
     virtual char getc(void) { return '\0'; }
     virtual void flush(void) {}
     virtual uint16_t bytes_available(void) { return 0; }
 
-    void putbuf(void* buf, uint16_t len) { for (uint16_t i = 0; i < len; i++) putc(((char*)buf)[i]); }
-    void puts(const char* s) { while (*s) { putc(*s); s++; }; }
+//    void putbuf(void* buf, uint16_t len) { for (uint16_t i = 0; i < len; i++) putc(((char*)buf)[i]); }
+//    void puts(const char* s) { while (*s) { putc(*s); s++; }; }
+
+    virtual void putbuf(void* buf, uint16_t len) {}
+
+    void putc(char c) { putbuf(&c, 1); }
+    void puts(const char* s) { putbuf((void*)s, strlen(s)+1); }
 };
 
 

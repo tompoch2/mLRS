@@ -62,11 +62,13 @@ class tSerialPort : public tSerialBase
 #else
     void Init(void) override { uartb_init(); SERORCOM_INIT; }
     void SetBaudRate(uint32_t baud) override { IFNSER(); uartb_setprotocol(baud, XUART_PARITY_NO, UART_STOPBIT_1); }
-    void putc(char c) override { IFNSER(); uartb_putc(c); }
+//    void putc(char c) override { IFNSER(); uartb_putc(c); }
     bool available(void) override { IFNSER(0); return uartb_rx_available(); }
     char getc(void) override { IFNSER(0); return uartb_getc(); }
     void flush(void) override { IFNSER(); uartb_rx_flush(); uartb_tx_flush(); }
     uint16_t bytes_available(void) override { IFNSER(0); return uartb_rx_bytesavailable(); }
+
+    void putbuf(void* buf, uint16_t len) override { IFNSER(); uartb_putbuf(buf, len); }
 #endif
 #endif
 };

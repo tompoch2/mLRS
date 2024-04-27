@@ -39,11 +39,16 @@ typedef enum {
 #define UARTB_SERIAL_NO Serial1
 #endif
 
-
+/*
 IRAM_ATTR uint16_t uartb_putc(char c)
 {
     UARTB_SERIAL_NO.write(c);
     return 1;
+} */
+
+IRAM_ATTR void uartb_putbuf(void* buf, uint16_t len)
+{
+    UARTB_SERIAL_NO.write((uint8_t*)buf, len);
 }
 
 
