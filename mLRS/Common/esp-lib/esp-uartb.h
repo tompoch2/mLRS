@@ -85,10 +85,16 @@ IRAM_ATTR uint16_t uartb_rx_available(void)
 //-------------------------------------------------------
 // INIT routines
 //-------------------------------------------------------
+// Note: ESP32 has a hardware fifo for tx, which is 128 bytes in size. However, MAVLink messages
+// can be larger than this, and data would thus be lost when put only into the fifo. It is therefore
+// crucial to set a Tx buffer size of sufficient size. setTxBufferSize() is not available for ESP82xx.
 
 void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbits)
 {
     UARTB_SERIAL_NO.end();
+#ifdef ESP32
+    UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
+#endif
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
     UARTB_SERIAL_NO.begin(baud);
 #ifdef ESP32
@@ -100,6 +106,9 @@ void uartb_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM sto
 
 void uartb_init(void)
 {
+#ifdef ESP32
+    UARTB_SERIAL_NO.setTxBufferSize(UARTB_TXBUFSIZE);
+#endif
     UARTB_SERIAL_NO.setRxBufferSize(UARTB_RXBUFSIZE);
     UARTB_SERIAL_NO.begin(UARTB_BAUD);
 #ifdef ESP32
