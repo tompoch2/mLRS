@@ -251,7 +251,7 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 
 //-- POWER
 
-#define POWER_GAIN_DBM            13 // gain of a PA stage if present
+#define POWER_GAIN_DBM            0 // 13 // gain of a PA stage if present
 #define POWER_SX1276_MAX_DBM      SX1276_OUTPUT_POWER_MAX // maximum allowed sx power
 #define POWER_USE_DEFAULT_RFPOWER_CALC
 
