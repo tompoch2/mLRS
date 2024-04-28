@@ -20,7 +20,7 @@
   "radio_nss": 4,
   "radio_rst": 5,
   "radio_sck": 18,
-  "radio_dcdc": true,
+  "radio_dcdc": true,       ???
   "radio_rfo_hf": true,
   "power_txen": 33,
   "power_apc2": 26,
@@ -95,11 +95,13 @@
 #define SPI_MISO                  IO_P19
 #define SPI_MOSI                  IO_P23
 #define SPI_SCK                   IO_P18
-#define SPI_FREQUENCY             18000000L
+#define SPI_FREQUENCY             10000000L
 #define SX_RESET                  IO_P5
 #define SX_DIO0                   IO_P22
 #define SX_TX_EN                  IO_P33
 //#define SX_RX_EN                  IO_P27
+
+#define SX_USE_RFO
 
 IRQHANDLER(void SX_DIO_EXTI_IRQHandler(void);)
 
