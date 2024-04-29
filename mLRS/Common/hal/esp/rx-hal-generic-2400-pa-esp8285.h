@@ -67,13 +67,14 @@ IRAM_ATTR void sx_amp_receive(void)
     gpio_high(SX_RX_EN);
 }
 
-IRAM_ATTR void sx_dio_enable_exti_isr(void)
+void sx_dio_init_exti_isroff(void) {}
+
+void sx_dio_enable_exti_isr(void)
 {
     attachInterrupt(SX_DIO1, SX_DIO_EXTI_IRQHandler, RISING);
 }
 
-void sx_dio_init_exti_isroff(void) {}
-void sx_dio_exti_isr_clearflag(void) {}
+IRAM_ATTR void sx_dio_exti_isr_clearflag(void) {}
 
 
 //-- Button
