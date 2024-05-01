@@ -79,12 +79,10 @@
 
 #define UARTC_USE_SERIAL
 #define UARTC_BAUD                115200
-#define UARTF_USE_TX_IO           IO_P17
-#define UARTF_USE_RX_IO           IO_P16
 #define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
 #define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
 
-#define UARTF_USE_SERIAL1
+#define UARTF_USE_SERIAL
 #define UARTF_BAUD                115200
 #define UARTF_TXBUFSIZE           0 // ?? // 512
 
@@ -99,7 +97,7 @@
 #define SX_RESET                  IO_P5
 #define SX_DIO0                   IO_P22
 #define SX_TX_EN                  IO_P33
-//#define SX_RX_EN                  IO_P27
+//#define SX_RX_EN                  IO_P?
 
 #define SX_USE_RFO
 
@@ -158,11 +156,11 @@ IRAM_ATTR bool button_pressed(void)
 
 void leds_init(void)
 {
-    gpio_init(LED_RED, IO_MODE_OUTPUT_PP_HIGH);
+    gpio_init(LED_RED, IO_MODE_OUTPUT_PP_LOW);
 }
 
-IRAM_ATTR void led_red_off(void) { gpio_high(LED_RED); }
-IRAM_ATTR void led_red_on(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_off(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_on(void) { gpio_high(LED_RED); }
 IRAM_ATTR void led_red_toggle(void) { gpio_toggle(LED_RED); }
 
 
