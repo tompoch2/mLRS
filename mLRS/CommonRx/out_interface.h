@@ -67,6 +67,17 @@ class tOut : public OutBase
     }
 #endif
 
+#if defined DEVICE_HAS_OUT
+    bool config_crsf_tx_jrpin5(bool enable_flag) override
+    {
+        if (enable_flag) {
+            uart_setprotocol(400000, XUART_PARITY_NO, UART_STOPBIT_1);
+            out_set_inverted();
+        }
+        return true;
+    }
+#endif
+
     void putc(char c) override { uart_putc(c); }
 
     void SendLinkStatistics(void)
