@@ -108,11 +108,6 @@ void sx_init_gpio(void)
     gpio_init(SX_DIO0, IO_MODE_INPUT_ANALOG);
     gpio_init(SX_TX_EN, IO_MODE_OUTPUT_PP_LOW);
     gpio_init(SX_RESET, IO_MODE_OUTPUT_PP_HIGH);
-
-    //gpio_init(26, IO_MODE_INPUT_ANALOG);
-    //gpio_init(26, IO_MODE_OUTPUT_PP);
-    //pinMode(IO_P26, 0x2);
-    dacWrite(IO_P26, 100);
 }
 
 IRAM_ATTR void sx_amp_transmit(void)
@@ -142,7 +137,7 @@ void sx_dio_exti_isr_clearflag(void) {}
 
 //-- Button
 
-#define BUTTON                    IO_P0
+#define BUTTON                    IO_P?
 
 void button_init(void)
 {
@@ -256,7 +251,7 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 
 #define POWER_GAIN_DBM            0 // 13 // gain of a PA stage if present
 #define POWER_SX1276_MAX_DBM      SX1276_OUTPUT_POWER_MAX // maximum allowed sx power
-#define POWER_USE_DEFAULT_RFPOWER_CALC
+//#define POWER_USE_DEFAULT_RFPOWER_CALC
 
 /*
 void rfpower_calc(int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm, tI2cBase* dac)
@@ -313,6 +308,14 @@ void rfpower_calc(int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm,
 }
 */
 
+void sx1276_rfpower_calc(const int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm, const uint8_t GAIN_DBM, const uint8_t SX1276_MAX_DBM)
+{
+    *sx_power = 0;
+    *actual_power_dbm = 1;
+
+    dacWrite(IO_P26, 128);
+    dacWrite(IO_P26, 128);
+}
 
 #define RFPOWER_DEFAULT           1 // index into rfpower_list array
 
