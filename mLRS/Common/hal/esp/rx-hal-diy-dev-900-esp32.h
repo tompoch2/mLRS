@@ -5,26 +5,13 @@
 //*******************************************************
 // hal
 //********************************************************
-// ESP8266 DEVBOARD 900 RX
-//
-// Uses a Lolin Node MCU V3 ESP8266 Devboard and a SX1276 module
-//
-// Could use other ESP8266 devboards
-//
-// https://www.aliexpress.com/item/1005005077804800.html
-// https://www.aliexpress.com/item/32962551530.html
-//
-// 3v  ->  Vcc
-// G   ->  GND
-// D8  ->  NSS
-// D7  ->  MOSI
-// D6  ->  MISO
-// D5  ->  SCK
-// D2  ->  REST
-// D1  ->  DIO0
+
+//-------------------------------------------------------
+// ESP8266, DIY DEV BOARD 900 RX
 //-------------------------------------------------------
 
 #define DEVICE_HAS_SINGLE_LED
+//#define DEVICE_HAS_NO_DEBUG
 #define DEVICE_HAS_SERIAL_OR_DEBUG
 
 
@@ -33,10 +20,10 @@
 // UART = output port, SBus or whatever
 // UARTC = debug port
 
-#define UARTB_USE_SERIAL
+#define UARTB_USE_SERIAL1
 #define UARTB_BAUD                RX_SERIAL_BAUDRATE
-#define UARTB_TXBUFSIZE           RX_SERIAL_TXBUFSIZE // 1024 // 512
-#define UARTB_RXBUFSIZE           RX_SERIAL_RXBUFSIZE // 1024 // 512
+#define UARTB_TXBUFSIZE           RX_SERIAL_TXBUFSIZE
+#define UARTB_RXBUFSIZE           RX_SERIAL_RXBUFSIZE
 
 #define UARTC_USE_SERIAL
 #define UARTC_BAUD                115200
@@ -44,17 +31,23 @@
 
 //-- SX1: SX12xx & SPI
 
-#define SPI_CS_IO                 IO_P8
+#define SPI_CS_IO                 IO_P18
 #define SPI_FREQUENCY             10000000L
-#define SX_RESET                  IO_P2
-#define SX_DIO0                   IO_P1
+#define SPI_MISO                  IO_P19
+#define SPI_MOSI                  IO_P27
+#define SPI_SCK                   IO_P5
+#define SX_RESET                  IO_P14
+#define SX_DIO0                   IO_P26
 
 IRQHANDLER(void SX_DIO_EXTI_IRQHandler(void);)
 
 void sx_init_gpio(void)
 {
+    gpio_init(SX_DIO0, IO_MODE_INPUT_ANALOG);
     gpio_init(SX_RESET, IO_MODE_OUTPUT_PP_HIGH);
-    pinMode(SX_DIO0, INPUT_PULLDOWN_16);
+
+    // Fake ground for serial
+    gpio_init(13, IO_MODE_OUTPUT_PP_LOW);
 }
 
 IRAM_ATTR void sx_amp_transmit(void) {}
@@ -80,21 +73,21 @@ void button_init(void)
 
 IRAM_ATTR bool button_pressed(void)
 {
-    return (digitalRead(BUTTON) == HIGH) ? false : true;
+    return gpio_read_activelow(BUTTON) ? true : false;
 }
 
 
 //-- LEDs
 
-#define LED_RED                   IO_P4
+#define LED_RED                   IO_P25
 
 void leds_init(void)
 {
-    gpio_init(LED_RED, IO_MODE_OUTPUT_PP_HIGH);
+    gpio_init(LED_RED, IO_MODE_OUTPUT_PP_LOW);
 }
 
-IRAM_ATTR void led_red_off(void) { gpio_high(LED_RED); }
-IRAM_ATTR void led_red_on(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_off(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_on(void) { gpio_high(LED_RED); }
 IRAM_ATTR void led_red_toggle(void) { gpio_toggle(LED_RED); }
 
 
