@@ -103,6 +103,6 @@ IRAM_ATTR void led_red_toggle(void) { gpio_toggle(LED_RED); }
 #define RFPOWER_DEFAULT           0 // index into rfpower_list array
 
 const rfpower_t rfpower_list[] = {
-    { .dbm = POWER_MIN, .mW = INT8_MIN },  // really about 24 dBm
-    { .dbm = POWER_27_DBM, .mW = 500 },
+    { .dbm = POWER_MIN, .mW = INT8_MIN },  // really about 21 dBm
+    { .dbm = POWER_27_DBM, .mW = 500 },    // 27 dBm
 };
