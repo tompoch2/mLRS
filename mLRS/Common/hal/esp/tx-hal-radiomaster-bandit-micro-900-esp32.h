@@ -54,8 +54,8 @@
 //#define DEVICE_HAS_IN
 //#define DEVICE_HAS_SERIAL_OR_COM    // board has UART which is shared between Serial or Com, selected by e.g. a switch
 #define DEVICE_HAS_NO_SERIAL
-#define DEVICE_HAS_NO_COM
-//#define DEVICE_HAS_NO_DEBUG
+//#define DEVICE_HAS_NO_COM
+#define DEVICE_HAS_NO_DEBUG
 
 #define DEVICE_HAS_SINGLE_LED
 //#define DEVICE_HAS_I2C_DISPLAY_ROT180
@@ -97,7 +97,6 @@
 #define SX_RESET                  IO_P5
 #define SX_DIO0                   IO_P22
 #define SX_TX_EN                  IO_P33
-//#define SX_RX_EN                  IO_P?
 
 #define SX_USE_RFO
 
@@ -112,14 +111,12 @@ void sx_init_gpio(void)
 
 IRAM_ATTR void sx_amp_transmit(void)
 {
-//    gpio_low(SX_RX_EN);
     gpio_high(SX_TX_EN);
 }
 
 IRAM_ATTR void sx_amp_receive(void)
 {
     gpio_low(SX_TX_EN);
-//    gpio_high(SX_RX_EN);
 }
 
 void sx_dio_enable_exti_isr(void)
@@ -137,17 +134,8 @@ void sx_dio_exti_isr_clearflag(void) {}
 
 //-- Button
 
-#define BUTTON                    IO_P?
-
-void button_init(void)
-{
-//    gpio_init(BUTTON, IO_MODE_INPUT_PU);
-}
-
-IRAM_ATTR bool button_pressed(void)
-{
-    return false; // gpio_read_activelow(BUTTON) ? true : false;
-}
+void button_init(void) {}
+IRAM_ATTR bool button_pressed(void) { return false; }
 
 
 //-- LEDs
@@ -253,68 +241,49 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 #define POWER_SX1276_MAX_DBM      SX1276_OUTPUT_POWER_MAX // maximum allowed sx power
 //#define POWER_USE_DEFAULT_RFPOWER_CALC
 
-/*
-void rfpower_calc(int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm, tI2cBase* dac)
-{
-    // these are the values of ELRS
-    // 10mW   10dbm   720
-    // 25mW   14dbm   875
-    // 50mW   17dBm   1000
-    // 100mW  20dBm   1140
-    // 250mW  24dBm   1390
-    // 500mW  27dBm   1730
-    // 1000mW 30dBm   2100
-    // my estimated 1mW 0dBm 200
-    // measurements with an IRC power meter suggests changes (https://www.rcgroups.com/forums/showpost.php?p=49934177&postcount=888)
-    uint32_t voltage_mV; // 2500 was too high
-    if (power_dbm > 28) {
-        voltage_mV = 2250; // was 2100
-        *actual_power_dbm = 30;
-    } else if (power_dbm > 25) {
-        voltage_mV = 1730;
-        *actual_power_dbm = 27;
-    } else if (power_dbm > 22) {
-        //voltage_mV = 1390;
-        //*actual_power_dbm = 23;
-        voltage_mV = 1475;
-        *actual_power_dbm = 24;
-    } else if (power_dbm > 18) {
-        voltage_mV = 1195; // was 1140
-        *actual_power_dbm = 20;
-    } else if (power_dbm > 15) {
-        voltage_mV = 1000;
-        *actual_power_dbm = 17;
-    } else if (power_dbm > 12) {
-        voltage_mV = 875;
-        *actual_power_dbm = 14;
-    } else if (power_dbm > 5) {
-        voltage_mV = 720;
-        *actual_power_dbm = 10;
-    } else {
-        voltage_mV = 100; // was 200
-        *actual_power_dbm = 3; // was 0
-    }
-
-    //if (!dac->initialized) return;
-    // convert voltage to 0 .. 255
-    uint16_t value = (voltage_mV >= 3300) ? 255 : (voltage_mV * 255) / 3300; // don't bother with rounding
-    // construct data word
-    uint8_t buf[2];
-    buf[0] = (value & 0x00F0) >> 4;
-    buf[1] = (value & 0x000F) << 4;
-    dac->put_buf_blocking(SX_PA_DAC_I2C_DEVICE_ADR, buf, 2);
-
-    *sx_power = 0;
-}
-*/
-
 void sx1276_rfpower_calc(const int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm, const uint8_t GAIN_DBM, const uint8_t SX1276_MAX_DBM)
 {
-    *sx_power = 0;
-    *actual_power_dbm = 1;
+    // jr bay: 
+    //   SX1276_MAX_POWER_15_DBM:   dac = 0,   sx_power = 15 => 30.5 dBm
+    //                              dac = 0,   sx_power = 0  => 27.4 dBm
+    //                              dac = 190, sx_power = 0  => -25 dBm !!!
+    //                              dac = 180, sx_power = 0  => 18.8 dBm
+    //                              dac = 150, sx_power = 0  => 24.7 dBm
+    //                              dac = 100, sx_power = 0  => 27.3 dBm
+    //   SX1276_MAX_POWER_10p8_DBM: dac = 0,   sx_power = 15 => 29.4 dBm
+    //                              dac = 0,   sx_power = 0  => 21.0 dBm
+    //                              dac = 180, sx_power = 0  => 10.7 dBm
+    //   SX1276_MAX_POWER_11p4_DBM  dac = 0,   sx_power = 0  => 27.3 dBm
+    //                              dac = 100, sx_power = 15 => 29.9 dBm
+    //                              dac = 0,   sx_power = 15 => 30.0 dBm
+    //                              dac = 180, sx_power = 0  => 10.1 dBm
 
-    dacWrite(IO_P26, 128);
-    dacWrite(IO_P26, 128);
+    uint8_t dac = 100;
+
+    if (power_dbm > 28) { // -> 30
+        dac = 0;
+        *sx_power = 15; // equals SX1276_OUTPUT_POWER_MAX
+        *actual_power_dbm = 30;
+    } else if (power_dbm > 25) { // -> 27
+        dac = 140;
+        *sx_power = 15;
+        *actual_power_dbm = 27;
+    } else if (power_dbm > 22) { // -> 24
+        dac = 150;
+        *sx_power = 6;
+        *actual_power_dbm = 24;
+    } else if (power_dbm > 18) { // -> 20
+        dac = 150;
+        *sx_power = 0;
+        *actual_power_dbm = 20;
+    } else {
+        dac = 180;
+        *sx_power = 0;
+        *actual_power_dbm = 10;
+    }
+
+    dacWrite(IO_P26, dac);
+    dacWrite(IO_P26, dac);
 }
 
 #define RFPOWER_DEFAULT           1 // index into rfpower_list array
@@ -324,5 +293,6 @@ const rfpower_t rfpower_list[] = {
     { .dbm = POWER_20_DBM, .mW = 100 },
     { .dbm = POWER_24_DBM, .mW = 250 },
     { .dbm = POWER_27_DBM, .mW = 500 },
+    { .dbm = POWER_30_DBM, .mW = 1000 },
 };
 
