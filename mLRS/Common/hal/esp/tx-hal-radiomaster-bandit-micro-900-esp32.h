@@ -53,9 +53,9 @@
 //#define DEVICE_HAS_JRPIN5
 //#define DEVICE_HAS_IN
 //#define DEVICE_HAS_SERIAL_OR_COM    // board has UART which is shared between Serial or Com, selected by e.g. a switch
-//#define DEVICE_HAS_NO_SERIAL
+#define DEVICE_HAS_NO_SERIAL
 #define DEVICE_HAS_NO_COM
-#define DEVICE_HAS_NO_DEBUG
+//#define DEVICE_HAS_NO_DEBUG
 
 #define DEVICE_HAS_SINGLE_LED
 //#define DEVICE_HAS_I2C_DISPLAY_ROT180
@@ -72,8 +72,8 @@
 
 #define UARTB_USE_SERIAL
 #define UARTB_BAUD                TX_SERIAL_BAUDRATE
-#define UARTB_USE_TX_IO           IO_P17
-#define UARTB_USE_RX_IO           IO_P16
+//#define UARTB_USE_TX_IO           IO_P17
+//#define UARTB_USE_RX_IO           IO_P16
 #define UARTB_TXBUFSIZE           1024 // TX_SERIAL_TXBUFSIZE
 #define UARTB_RXBUFSIZE           TX_SERIAL_RXBUFSIZE
 
@@ -108,6 +108,11 @@ void sx_init_gpio(void)
     gpio_init(SX_DIO0, IO_MODE_INPUT_ANALOG);
     gpio_init(SX_TX_EN, IO_MODE_OUTPUT_PP_LOW);
     gpio_init(SX_RESET, IO_MODE_OUTPUT_PP_HIGH);
+
+    //gpio_init(26, IO_MODE_INPUT_ANALOG);
+    //gpio_init(26, IO_MODE_OUTPUT_PP);
+    //pinMode(IO_P26, 0x2);
+    dacWrite(IO_P26, 100);
 }
 
 IRAM_ATTR void sx_amp_transmit(void)
@@ -253,7 +258,63 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 #define POWER_SX1276_MAX_DBM      SX1276_OUTPUT_POWER_MAX // maximum allowed sx power
 #define POWER_USE_DEFAULT_RFPOWER_CALC
 
-#define RFPOWER_DEFAULT           0 // index into rfpower_list array
+/*
+void rfpower_calc(int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm, tI2cBase* dac)
+{
+    // these are the values of ELRS
+    // 10mW   10dbm   720
+    // 25mW   14dbm   875
+    // 50mW   17dBm   1000
+    // 100mW  20dBm   1140
+    // 250mW  24dBm   1390
+    // 500mW  27dBm   1730
+    // 1000mW 30dBm   2100
+    // my estimated 1mW 0dBm 200
+    // measurements with an IRC power meter suggests changes (https://www.rcgroups.com/forums/showpost.php?p=49934177&postcount=888)
+    uint32_t voltage_mV; // 2500 was too high
+    if (power_dbm > 28) {
+        voltage_mV = 2250; // was 2100
+        *actual_power_dbm = 30;
+    } else if (power_dbm > 25) {
+        voltage_mV = 1730;
+        *actual_power_dbm = 27;
+    } else if (power_dbm > 22) {
+        //voltage_mV = 1390;
+        //*actual_power_dbm = 23;
+        voltage_mV = 1475;
+        *actual_power_dbm = 24;
+    } else if (power_dbm > 18) {
+        voltage_mV = 1195; // was 1140
+        *actual_power_dbm = 20;
+    } else if (power_dbm > 15) {
+        voltage_mV = 1000;
+        *actual_power_dbm = 17;
+    } else if (power_dbm > 12) {
+        voltage_mV = 875;
+        *actual_power_dbm = 14;
+    } else if (power_dbm > 5) {
+        voltage_mV = 720;
+        *actual_power_dbm = 10;
+    } else {
+        voltage_mV = 100; // was 200
+        *actual_power_dbm = 3; // was 0
+    }
+
+    //if (!dac->initialized) return;
+    // convert voltage to 0 .. 255
+    uint16_t value = (voltage_mV >= 3300) ? 255 : (voltage_mV * 255) / 3300; // don't bother with rounding
+    // construct data word
+    uint8_t buf[2];
+    buf[0] = (value & 0x00F0) >> 4;
+    buf[1] = (value & 0x000F) << 4;
+    dac->put_buf_blocking(SX_PA_DAC_I2C_DEVICE_ADR, buf, 2);
+
+    *sx_power = 0;
+}
+*/
+
+
+#define RFPOWER_DEFAULT           1 // index into rfpower_list array
 
 const rfpower_t rfpower_list[] = {
     { .dbm = POWER_MIN, .mW = INT8_MIN },
