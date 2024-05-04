@@ -46,6 +46,9 @@
 #if defined USE_COM && !defined DEVICE_HAS_COM_ON_USB
 #include "../Common/esp-lib/esp-uartc.h"
 #endif
+#ifdef USE_SERIAL2
+#include "../Common/esp-lib/esp-uartd.h"
+#endif
 #ifdef USE_DEBUG
 #ifdef DEVICE_HAS_DEBUG_SWUART
 #include "../Common/esp-lib/esp-uart-sw.h"
