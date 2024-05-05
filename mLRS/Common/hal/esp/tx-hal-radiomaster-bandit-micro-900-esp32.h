@@ -61,6 +61,7 @@
 #define DEVICE_HAS_I2C_DISPLAY_ROT180
 //#define DEVICE_HAS_FIVEWAY
 #define DEVICE_HAS_FAN_ONOFF // board has a Fan, which can be set on or off
+#define DEVICE_HAS_ESP_WIFI_BRIDGE_ON_SERIAL2
 
 
 //-- UARTS
@@ -219,6 +220,11 @@ IRAM_ATTR bool ser_or_com_serial(void)
 {
     return tx_ser_or_com_serial;
 }
+
+IRAM_ATTR void ser_or_com_set_to_com(void)
+{
+    tx_ser_or_com_serial = false;
+}
 #endif
 
 
@@ -244,23 +250,23 @@ IRAM_ATTR void fan_set_power(int8_t power_dbm)
 
 //-- ESP32 Wifi Bridge
 
-#define ESP_RESET                 IO_P25
-#define ESP_GPIO0                 IO_P32
+#define ESP_RESET                 IO_P25 // backpack_en
+#define ESP_GPIO0                 IO_P32 // backpack_boot, seems to be inverted
 //#define ESP_DTR                   IO_PC14 // DTR from USB-TTL adapter -> GPIO
 //#define ESP_RTS                   IO_PC3  // RTS from USB-TTL adapter -> RESET
 
 #ifdef DEVICE_HAS_ESP_WIFI_BRIDGE_ON_SERIAL2
 void esp_init(void)
 {
-    gpio_init(ESP_GPIO0, IO_MODE_OUTPUT_PP_HIGH); // low -> esp will start in bootloader mode
+    gpio_init(ESP_GPIO0, IO_MODE_OUTPUT_PP_LOW); // high -> esp will start in bootloader mode
     gpio_init(ESP_RESET, IO_MODE_OUTPUT_PP_LOW); // low -> esp is in reset
 }
 
 IRAM_ATTR void esp_reset_high(void) { gpio_high(ESP_RESET); }
 IRAM_ATTR void esp_reset_low(void) { gpio_low(ESP_RESET); }
 
-IRAM_ATTR void esp_gpio0_high(void) { gpio_high(ESP_GPIO0); }
-IRAM_ATTR void esp_gpio0_low(void) { gpio_low(ESP_GPIO0); }
+IRAM_ATTR void esp_gpio0_high(void) { gpio_low(ESP_GPIO0); }
+IRAM_ATTR void esp_gpio0_low(void) { gpio_high(ESP_GPIO0); }
 
 //IRAM_ATTR uint8_t esp_dtr_rts(void) { return 0; }
 #endif
