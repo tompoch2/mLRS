@@ -6,6 +6,13 @@
 // hal
 //*******************************************************
 
+/*
+  Info on DIP switches
+   
+  1,2 on:   update firmware on main ESP32, USB is connected to UO 
+  3,4 on:   normal operation mode, USB is inoperational, UO connected to ESP8285
+  5,6,7 on: update firmware on ESP8285, USB is connected to ESP8285's uart
+*/
 
 //-------------------------------------------------------
 // ESP32, ELRS BETAFPV MICRO 1W 2400 TX
@@ -48,38 +55,35 @@
 
 //#define DEVICE_HAS_JRPIN5
 //#define DEVICE_HAS_IN
-#define DEVICE_HAS_SERIAL_OR_COM    // board has UART which is shared between Serial or Com, selected by e.g. a switch
+#define DEVICE_HAS_SERIAL_OR_COM // board has UART which is shared between Serial or Com, selected by e.g. a switch
 //#define DEVICE_HAS_NO_SERIAL
 //#define DEVICE_HAS_NO_COM
 #define DEVICE_HAS_NO_DEBUG
 
-#define DEVICE_HAS_I2C_DISPLAY_ROT180
+//#define DEVICE_HAS_I2C_DISPLAY_ROT180
 #define DEVICE_HAS_FIVEWAY
+#define DEVICE_HAS_FAN_ONOFF
 
 
 //-- UARTS
 // UARTB = serial port
 // UARTC or USB = COM (CLI)
-// UARTD = -
+// UARTD = serial2 BT/ESP port
 // UART  = JR bay pin5
 // UARTE = in port, SBus or whatever
 // UARTF = debug port
 
-#define UARTB_USE_SERIAL
+#define UARTB_USE_SERIAL // serial, is on P1/P3
 #define UARTB_BAUD                TX_SERIAL_BAUDRATE
-#define UARTB_USE_TX_IO           IO_P1 
-#define UARTB_USE_RX_IO           IO_P3
 #define UARTB_TXBUFSIZE           1024 // TX_SERIAL_TXBUFSIZE
 #define UARTB_RXBUFSIZE           TX_SERIAL_RXBUFSIZE
 
-#define UARTC_USE_SERIAL
+#define UARTC_USE_SERIAL // com USB/CLI, is on P1/P3
 #define UARTC_BAUD                115200
-#define UARTF_USE_TX_IO           IO_P1
-#define UARTF_USE_RX_IO           IO_P3
 #define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
 #define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
 
-#define UARTF_USE_SERIAL1
+#define UARTF_USE_SERIAL // debug
 #define UARTF_BAUD                115200
 #define UARTF_TXBUFSIZE           0 // ?? // 512
 
@@ -140,17 +144,8 @@ void sx_dio_exti_isr_clearflag(void) {}
 
 //-- Button
 
-#define BUTTON                    IO_P0
-
-void button_init(void)
-{
-    gpio_init(BUTTON, IO_MODE_INPUT_PU);
-}
-
-IRAM_ATTR bool button_pressed(void)
-{
-    return gpio_read_activelow(BUTTON) ? true : false;
-}
+void button_init(void) {}
+IRAM_ATTR bool button_pressed(void) { return false; }
 
 
 //-- LEDs
@@ -260,12 +255,12 @@ IRAM_ATTR uint16_t fiveway_adc_read(void)
 
 IRAM_ATTR uint8_t fiveway_read(void)
 {
-    uint16_t adc = analogRead(FIVEWAY_ADC_IO);
-    if (adc < (KEY_CENTER_THRESH+200)) return (1 << KEY_CENTER); // 0
-    if (adc > (KEY_LEFT_THRESH-200) && adc < (KEY_LEFT_THRESH+200)) return (1 << KEY_LEFT); 
-    if (adc > (KEY_DOWN_THRESH-200) && adc < (KEY_DOWN_THRESH+200)) return (1 << KEY_DOWN);
-    if (adc > (KEY_UP_THRESH-200) && adc < (KEY_UP_THRESH+200)) return (1 << KEY_UP);
-    if (adc > (KEY_RIGHT_THRESH-300) && adc < (KEY_RIGHT_THRESH+300)) return (1 << KEY_RIGHT);
+    int16_t adc = analogRead(FIVEWAY_ADC_IO);
+    if (adc > (KEY_CENTER_THRESH-250) && adc < (KEY_CENTER_THRESH+250)) return (1 << KEY_CENTER); // 0
+    if (adc > (KEY_LEFT_THRESH-250) && adc < (KEY_LEFT_THRESH+250)) return (1 << KEY_LEFT); 
+    if (adc > (KEY_DOWN_THRESH-250) && adc < (KEY_DOWN_THRESH+250)) return (1 << KEY_DOWN);
+    if (adc > (KEY_UP_THRESH-250) && adc < (KEY_UP_THRESH+250)) return (1 << KEY_UP);
+    if (adc > (KEY_RIGHT_THRESH-250) && adc < (KEY_RIGHT_THRESH+250)) return (1 << KEY_RIGHT);
     return 0;
 }
 #endif
