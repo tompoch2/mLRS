@@ -12,6 +12,7 @@
 //   https://www.gnu.org/licenses/gpl-3.0.de.html
 //*******************************************************
 // Graphic Display Interface
+// simplified 7.5.2024
 
 
 #include <string.h>
@@ -305,9 +306,6 @@ void gdisp_update(void)
 
     if (res != HAL_OK) return; // retry, needs update is not reset, so it will tried the next time again
 
-    gdisp.minx = gdisp.width;
-    gdisp.miny = gdisp.height;
-    gdisp.maxx = gdisp.maxy = 0;
     gdisp.needsupdate = 0;
 }
 
@@ -336,9 +334,6 @@ void gdisp_setrotation(uint16_t rotation)
     }
 
     // clear
-    gdisp.minx = gdisp.width;
-    gdisp.miny = gdisp.height;
-    gdisp.maxx = gdisp.maxy = 0;
     gdisp.needsupdate = 0;
     memset(gdisp.buf, 0, GDISPLAY_BUFSIZE);
 }
@@ -353,16 +348,6 @@ void gdisp_setrotation(uint16_t rotation)
 // helper
 // should never be directly called by the user
 //-------------------------------------------------------
-
-static inline void gdisp_u_(int16_t minx, int16_t maxx, int16_t miny, int16_t maxy)
-{
-    if (minx < gdisp.minx) gdisp.minx = minx;
-    if (miny < gdisp.miny) gdisp.miny = miny;
-    if (maxx > gdisp.maxx) gdisp.maxx = maxx;
-    if (maxy > gdisp.maxy) gdisp.maxy = maxy;
-    gdisp.needsupdate = 1;
-}
-
 
 void gdisp_setpixel_(uint16_t x, uint16_t y, uint16_t color)
 {
@@ -418,7 +403,7 @@ void gdisp_setpixelfuncptr_(uint16_t rotation)
 
 void gdisp_clear(void)
 {
-    gdisp_u_(0, 0, gdisp.width - 1, gdisp.height - 1);
+    gdisp.needsupdate = 1;
     memset(gdisp.buf, 0, GDISPLAY_BUFSIZE);
 }
 
@@ -698,10 +683,7 @@ void gdisp_init(uint16_t type)
     gdisp.kerning = 0;
     gdisp.inverted = 0;
 
-    //gdisp.minx = gdisp.miny = gdisp.maxx = gdisp.maxy = 0;
-    //  gdisp.needsupdate = 0;
-    gdisp.needsupdate = 1; // we fake this here
-    gdisp_clear();
+    gdisp_clear(); // sets also gdisp.needsupdate = 1;
     gdisp_update();
 }
 
