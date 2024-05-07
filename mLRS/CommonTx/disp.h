@@ -36,6 +36,7 @@ class tTxDisp
 
 
 extern tGDisplay gdisp;
+void i2c_spin(uint16_t chunksize);
 
 
 #define DISP_START_TMO_MS       SYSTICK_DELAY_MS(500)
@@ -87,6 +88,8 @@ class tTxDisp
     void DrawNotify(const char* s);
     void DrawBoot(void);
     void DrawFlashEsp(void);
+
+    void SpinI2C(uint8_t mode);
 
     typedef struct {
         uint8_t list[SETUP_PARAMETER_NUM];
@@ -517,6 +520,25 @@ void tTxDisp::Draw(void)
 //while (!gdisp_update_completed()) {}
 //t2 = micros16(); //HAL_GetTick();
 //dbg.puts("\nupda ");dbg.puts(u16toBCD_s(t1));dbg.puts(" , ");dbg.puts(u16toBCD_s(t2-t1));
+    }
+}
+
+
+void tTxDisp::SpinI2C(uint8_t mode)
+{
+    switch (mode) {
+    case MODE_FLRC_111HZ:
+        i2c_spin(GDISPLAY_BUFSIZE/6+1);
+        break;
+    case MODE_50HZ:
+    case MODE_FSK_50HZ:
+        i2c_spin(GDISPLAY_BUFSIZE/2);
+        break;
+    case MODE_31HZ:
+        i2c_spin(GDISPLAY_BUFSIZE);
+        break;
+    default:    
+        i2c_spin(GDISPLAY_BUFSIZE);
     }
 }
 

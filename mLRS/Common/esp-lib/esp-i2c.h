@@ -51,6 +51,7 @@ IRAM_ATTR HAL_StatusTypeDef i2c_put_blocked(uint8_t reg_adr, uint8_t* buf, uint1
 }
 
 
+/*
 IRAM_ATTR HAL_StatusTypeDef i2c_put(uint8_t reg_adr, uint8_t* buf, uint16_t len)
 {
     Wire.beginTransmission(i2c_dev_adr);
@@ -67,6 +68,52 @@ IRAM_ATTR HAL_StatusTypeDef i2c_device_ready(void)
     uint8_t error = Wire.endTransmission(true);
     return (error == 0) ? HAL_OK : HAL_ERROR;
 }
+*/
+
+struct {
+    uint8_t reg_adr;
+    uint16_t pos;
+    uint16_t len = 0;
+} i2c_buf;
+uint8_t i2c_buffer[1024];
+
+
+IRAM_ATTR HAL_StatusTypeDef i2c_put(uint8_t reg_adr, uint8_t* buf, uint16_t len)
+{
+    i2c_buf.reg_adr = reg_adr;
+    i2c_buf.len = len;
+    i2c_buf.pos = 0;
+    memcpy(i2c_buffer, buf, i2c_buf.len);
+    return HAL_OK;
+}
+
+
+IRAM_ATTR void i2c_spin(uint16_t chunksize)
+{
+    if (!i2c_buf.len) return; // nothing to do
+
+    if (i2c_buf.pos + chunksize > i2c_buf.len) chunksize = i2c_buf.len - i2c_buf.pos;
+
+    if (chunksize) {
+        Wire.beginTransmission(i2c_dev_adr);
+        Wire.write(i2c_buf.reg_adr);
+        Wire.write(&(i2c_buffer[i2c_buf.pos]), chunksize);
+        Wire.endTransmission(true);
+    }
+
+    i2c_buf.pos += chunksize;
+    if (i2c_buf.pos >= i2c_buf.len) i2c_buf.len = 0; // done
+}
+
+
+IRAM_ATTR HAL_StatusTypeDef i2c_device_ready(void)
+{
+    if (i2c_buf.len) return HAL_BUSY;
+
+    Wire.beginTransmission(i2c_dev_adr);
+    uint8_t error = Wire.endTransmission(true);
+    return (error == 0) ? HAL_OK : HAL_ERROR;
+}
 
 
 //-------------------------------------------------------
@@ -79,6 +126,8 @@ void i2c_init(void)
     Wire.setBufferSize(I2C_BUFFER_SIZE);
     Wire.setTimeout(2);
     i2c_dev_adr = 0;
+
+    i2c_buf.len = 0;
 }
 
 

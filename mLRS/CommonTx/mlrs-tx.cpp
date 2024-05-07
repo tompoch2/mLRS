@@ -207,6 +207,8 @@ void WhileTransmit::handle_once(void)
         draw_tlast_ms = tnow_ms;
         disp.Draw();
     }
+
+    disp.SpinI2C(Config.Mode);
 #endif
 }
 
