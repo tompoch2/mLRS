@@ -130,7 +130,7 @@ tTxCli cli;
 
 
 //-------------------------------------------------------
-// Mavlink
+// MAVLink
 //-------------------------------------------------------
 
 #include "mavlink_interface_tx.h"
@@ -1151,7 +1151,7 @@ IF_IN(
     case CLI_TASK_CHANGE_CONFIG_ID: config_id.Change(cli.GetTaskValue()); break;
     }
 
-    //-- Handle RSP wifi bridge
+    //-- Handle ESP wifi bridge
 
     esp.Do();
     uint8_t esp_task = esp.Task();
