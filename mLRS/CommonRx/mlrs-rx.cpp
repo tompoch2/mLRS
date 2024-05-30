@@ -274,8 +274,17 @@ void pack_rxcmdframe(tRxFrame* frame, tFrameStats* frame_stats)
 
 
 //-- normal Tx, Rx frames handling
+// receive
+//   isr:        -> irq2_status
+//   isr loop:   -> do_receive()
+//               -> link_rx1_status
+//   post loop:  -> handle_receive() or handle_receive_none()
+//                   if valid -> process_received_frame()
+// transmit
+//   -> do_transmit()
+//       -> prepare_transmit_frame()
 
-void prepare_transmit_frame(uint8_t antenna, uint8_t ack)
+void prepare_transmit_frame(uint8_t antenna)
 {
 uint8_t payload[FRAME_RX_PAYLOAD_LEN];
 uint8_t payload_len = 0;
@@ -287,7 +296,6 @@ uint8_t payload_len = 0;
             for (uint8_t i = 0; i < FRAME_RX_PAYLOAD_LEN; i++) {
                 if (!sx_serial.available()) break;
                 payload[payload_len] = sx_serial.getc();
-//dbg.putc(payload[payload_len]);
                 payload_len++;
             }
 
@@ -302,7 +310,7 @@ uint8_t payload_len = 0;
 
     tFrameStats frame_stats;
     frame_stats.seq_no = stats.transmit_seq_no;
-    frame_stats.ack = ack;
+    frame_stats.ack = 1;
     frame_stats.antenna = stats.last_antenna;
     frame_stats.transmit_antenna = antenna;
     frame_stats.rssi = stats.GetLastRssi();
@@ -358,7 +366,7 @@ void process_received_frame(bool do_payload, tTxFrame* frame)
 
 //-- receive/transmit handling api
 
-void handle_receive(uint8_t antenna)
+void handle_receive(uint8_t antenna) // RX_STATUS_INVALID, RX_STATUS_CRC1_VALID, RX_STATUS_VALID
 {
 uint8_t rx_status;
 tTxFrame* frame;
@@ -389,12 +397,7 @@ tTxFrame* frame;
         rxstats.doValidCrc1FrameReceived();
         if (rx_status == RX_STATUS_VALID) rxstats.doValidFrameReceived(); // should we count valid payload only if tx frame ?
 
-        stats.received_seq_no = frame->status.seq_no;
-        stats.received_ack = frame->status.ack;
-
     } else { // RX_STATUS_INVALID
-        stats.received_seq_no = UINT8_MAX;
-        stats.received_ack = 0;
     }
 
     // we set it for all received frames
@@ -407,15 +410,11 @@ tTxFrame* frame;
 
 void handle_receive_none(void) // RX_STATUS_NONE
 {
-    stats.received_seq_no = UINT8_MAX;
-    stats.received_ack = 0;
 }
 
 
 void do_transmit(uint8_t antenna) // we send a frame to transmitter
 {
-uint8_t ack = 1;
-
     if (bind.IsInBind()) {
         bind.do_transmit(antenna);
         return;
@@ -423,7 +422,7 @@ uint8_t ack = 1;
 
     stats.transmit_seq_no++;
 
-    prepare_transmit_frame(antenna, ack);
+    prepare_transmit_frame(antenna);
 
     // to test asymmetric connection, fake rxFrame, to no send doesn't work as it blocks the sx
     sxSendFrame(antenna, &rxFrame, FRAME_TX_RX_LEN, SEND_FRAME_TMO_MS); // 10ms tmo

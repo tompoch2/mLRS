@@ -439,8 +439,17 @@ void pack_txcmdframe(tTxFrame* frame, tFrameStats* frame_stats, tRcData* rc)
 
 
 //-- normal Tx, Rx frames handling
+// transmit
+//   -> do_transmit()
+//       -> prepare_transmit_frame()
+// receive
+//   isr:        -> irq2_status
+//   isr loop:   -> do_receive()
+//               -> link_rx1_status
+//   post loop:  -> handle_receive() or handle_receive_none()
+//                   if valid -> process_received_frame()
 
-void prepare_transmit_frame(uint8_t antenna, uint8_t ack)
+void prepare_transmit_frame(uint8_t antenna)
 {
 uint8_t payload[FRAME_TX_PAYLOAD_LEN];
 uint8_t payload_len = 0;
@@ -468,7 +477,7 @@ uint8_t payload_len = 0;
 
     tFrameStats frame_stats;
     frame_stats.seq_no = stats.transmit_seq_no;
-    frame_stats.ack = ack;
+    frame_stats.ack = 1;
     frame_stats.antenna = stats.last_antenna;
     frame_stats.transmit_antenna = antenna;
     frame_stats.rssi = stats.GetLastRssi();
@@ -491,7 +500,7 @@ void process_received_frame(bool do_payload, tRxFrame* frame)
     stats.received_LQ_rc = frame->status.LQ_rc;
     stats.received_LQ_serial = frame->status.LQ_serial;
 
-    if (!do_payload) return;
+    if (!do_payload) return; // always true
 
     if (frame->status.frame_type == FRAME_TYPE_TX_RX_CMD) {
         process_received_rxcmdframe(frame);
@@ -513,7 +522,7 @@ void process_received_frame(bool do_payload, tRxFrame* frame)
 
 //-- receive/transmit handling api
 
-void handle_receive(uint8_t antenna)
+void handle_receive(uint8_t antenna) // RX_STATUS_INVALID, RX_STATUS_VALID
 {
 uint8_t rx_status;
 tRxFrame* frame;
@@ -542,12 +551,7 @@ tRxFrame* frame;
 
         txstats.doValidFrameReceived(); // should we count valid payload only if rx frame ?
 
-        stats.received_seq_no = frame->status.seq_no;
-        stats.received_ack = frame->status.ack;
-
     } else { // RX_STATUS_INVALID
-        stats.received_seq_no = UINT8_MAX;
-        stats.received_ack = 0;
     }
 
     // we set it for all received frames
@@ -560,15 +564,11 @@ tRxFrame* frame;
 
 void handle_receive_none(void) // RX_STATUS_NONE
 {
-    stats.received_seq_no = UINT8_MAX;
-    stats.received_ack = 0;
 }
 
 
 void do_transmit(uint8_t antenna) // we send a TX frame to receiver
 {
-uint8_t ack = 1;
-
     if (bind.IsInBind()) {
         bind.do_transmit(antenna);
         return;
@@ -576,7 +576,7 @@ uint8_t ack = 1;
 
     stats.transmit_seq_no++;
 
-    prepare_transmit_frame(antenna, ack);
+    prepare_transmit_frame(antenna);
 
     sxSendFrame(antenna, &txFrame, FRAME_TX_RX_LEN, SEND_FRAME_TMO_MS); // 10 ms tmo
 }
