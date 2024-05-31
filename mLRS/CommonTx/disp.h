@@ -89,7 +89,7 @@ class tTxDisp
     void DrawBoot(void);
     void DrawFlashEsp(void);
 
-    void SpinI2C(uint8_t mode);
+    void SpinI2C(void);
 
     typedef struct {
         uint8_t list[SETUP_PARAMETER_NUM];
@@ -524,22 +524,14 @@ void tTxDisp::Draw(void)
 }
 
 
-void tTxDisp::SpinI2C(uint8_t mode)
+void tTxDisp::SpinI2C(void)
 {
-    switch (mode) {
-    case MODE_FLRC_111HZ:
-        i2c_spin(GDISPLAY_BUFSIZE/6+1);
-        break;
-    case MODE_50HZ:
-    case MODE_FSK_50HZ:
-        i2c_spin(GDISPLAY_BUFSIZE/2);
-        break;
-    case MODE_31HZ:
-        i2c_spin(GDISPLAY_BUFSIZE);
-        break;
-    default:    
-        i2c_spin(GDISPLAY_BUFSIZE);
-    }
+    // Timing on ESP32:
+    //   1024: 10.1 ms
+    //   256:   2.6 ms
+    //   128:   1.35 ms
+    //   64:    0.72 ms
+    i2c_spin(64);
 }
 
 

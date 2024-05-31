@@ -181,6 +181,7 @@ class WhileTransmit : public WhileBase
   public:
     uint32_t dtmax_us(void) override { return sx.TimeOverAir_us() - 1000; }
     void handle_once(void) override;
+    void handle(void) override;
 };
 
 WhileTransmit whileTransmit;
@@ -203,12 +204,18 @@ void WhileTransmit::handle_once(void)
     if (bind.IsInBind()) disp.SetBind();
 
     static uint32_t draw_tlast_ms = 0;
-    if (tnow_ms - draw_tlast_ms >= 40) { // effectively slows down (drawing takes time, ca 30 ms on G4, slower on other mcu)
+    if (tnow_ms - draw_tlast_ms >= 50) { // effectively slows down (drawing takes time, ca 30 ms on G4, slower on other mcu)
         draw_tlast_ms = tnow_ms;
         disp.Draw();
     }
+#endif
+}
 
-    disp.SpinI2C(Config.Mode);
+
+void WhileTransmit::handle(void)
+{
+#ifdef USE_DISPLAY
+    disp.SpinI2C();
 #endif
 }
 
