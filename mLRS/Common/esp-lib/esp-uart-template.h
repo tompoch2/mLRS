@@ -60,6 +60,15 @@ typedef enum {
   #define UART$_RXBUFSIZE       256 // MUST be 2^N
 #endif
 
+#ifdef ESP32
+  #if (UART$_TXBUFSIZE > 0) && (UART$_TXBUFSIZE < 256) 
+    #error UART$_TXBUFSIZE must be 0 or >= 256
+  #endif
+  #if (UART$_RXBUFSIZE > 0) && (UART$_RXBUFSIZE < 256) 
+    #error UART$_RXBUFSIZE must be 0 or >= 256
+  #endif
+#endif
+
 
 IRAM_ATTR void uart$_putbuf(uint8_t* buf, uint16_t len)
 {
