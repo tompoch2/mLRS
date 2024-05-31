@@ -79,7 +79,9 @@ typedef enum {
 typedef enum {
     DISP_ACTION_STORE = 0,
     DISP_ACTION_BIND,
+#if !(defined ESP8266 || defined ESP32) // ESP cannot be put into boot
     DISP_ACTION_BOOT,
+#endif        
 #ifdef USE_ESP_WIFI_BRIDGE
     DISP_ACTION_FLASH_ESP,
 #endif        
@@ -449,9 +451,11 @@ void tTxDisp::run_action(void)
     case DISP_ACTION_BIND:
         task_pending = CLI_TASK_BIND;
         break;
+#if !(defined ESP8266 || defined ESP32) // ESP cannot be put into boot
     case DISP_ACTION_BOOT:
         task_pending = CLI_TASK_BOOT;
         break;
+#endif        
 #ifdef USE_ESP_WIFI_BRIDGE
     case DISP_ACTION_FLASH_ESP:
         task_pending = CLI_TASK_FLASH_ESP;
@@ -483,6 +487,7 @@ void tTxDisp::DrawNotify(const char* s)
     draw_page_notify(s);
     gdisp_update();
     page_modified = false;
+    i2c_spin(GDISPLAY_BUFSIZE); // needed for ESP32 // always draw it directly to the buffer
 }
 
 
@@ -533,12 +538,7 @@ void tTxDisp::Draw(void)
 
 void tTxDisp::SpinI2C(void)
 {
-    // Timing on ESP32:
-    //   1024: 10.1 ms
-    //   256:   2.6 ms
-    //   128:   1.35 ms
-    //   64:    0.72 ms
-    i2c_spin(64);
+    i2c_spin(64); // for timing on ESP32 see below
 }
 
 
@@ -1008,11 +1008,13 @@ void tTxDisp::draw_page_actions(void)
 
     gdisp_unsetfont();
 
+#if !(defined ESP8266 || defined ESP32) // ESP cannot be put into boot
     idx++;
     gdisp_setcurXY(75, (idx - 2) * 11 + 20);
     if (idx == idx_focused) gdisp_setinverted();
     gdisp_puts("BOOT");
     gdisp_unsetinverted();
+#endif    
 
 #ifdef USE_ESP_WIFI_BRIDGE
     idx++;
@@ -1171,5 +1173,12 @@ FRM303 F072 48 MHz
   further optimization
   - no gdisp_u_() in gdisp_setpixel_()
   - func ptr for gdisp_setpixel_()
+
+31.05.2024:
+  timing on ESP32:
+    1024: 10.1 ms
+    256:   2.6 ms
+    128:   1.35 ms
+    64:    0.72 ms
 */
 
