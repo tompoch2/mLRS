@@ -6,7 +6,7 @@
 // Basic but effective & reliable transparent WiFi <-> serial bridge.
 // Minimizes wireless traffic while respecting latency by better packeting algorithm.
 //*******************************************************
-// 27. Apr. 2024
+// 1. June 2024
 //*********************************************************/
 // Adapted from mlrs-wireless-bridge for ESP32
 // ArduinoIDE 2.1.1, esp8266 by ESP8266 Community 3.1.2
@@ -28,7 +28,7 @@ Definitions:
 
 // Wireless protocol
 // 0 = WiFi TCP, 1 = WiFi UDP, 2 = Wifi UDPCl
-#define WIRELESS_PROTOCOL  0
+#define WIRELESS_PROTOCOL  1
 
 
 //**********************//
@@ -76,7 +76,7 @@ int baudrate = 115200;
 
 // LED pin (only effective for the generic module)
 // uncomment if you want a LED, and set the pin number as desired
-//#define LED_IO  13
+//#define LED_IO  2
 
 
 //-------------------------------------------------------
@@ -96,11 +96,6 @@ int baudrate = 115200;
 //-------------------------------------------------------
 // Module details
 //-------------------------------------------------------
-// board: Generic ESP8266 Module
-// http://www.ai-thinker.com/pro_view-88.html
-// IO3/IO1: U0RXD/U0TXD is Serial
-
-//#define LED_IO  2
 
 #ifdef LED_IO
 void led_init(void) 
@@ -180,6 +175,8 @@ void setup()
     size_t rxbufsize = serial.setRxBufferSize(2*1024); // must come before uart started, retuns 0 if it fails
     serial.begin(baudrate);
 
+    WiFi.disconnect(true);
+
 #if (WIRELESS_PROTOCOL <= 1)
 //-- WiFi TCP, UDP
 
@@ -201,6 +198,7 @@ void setup()
     WiFi.setOutputPower(WIFI_POWER); // set WiFi power, AP or STA must have been started, returns false if it fails
   #endif
   #if (WIRELESS_PROTOCOL == 1)
+    ip_udp[3] = 255; // somehow important
     udp.begin(port_udp);
   #else
     server.begin();
@@ -212,7 +210,7 @@ void setup()
 
     // STA mode
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
+    //WiFi.disconnect();
     WiFi.config(ip_udpcl, ip_gateway, netmask);
     WiFi.begin(network_ssid.c_str(), network_password.c_str());
 
