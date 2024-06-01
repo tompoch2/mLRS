@@ -12,6 +12,10 @@
   1,2 on:   update firmware on main ESP32, USB is connected to UO 
   3,4 on:   normal operation mode, USB is inoperational, UO connected to ESP8285
   5,6,7 on: update firmware on ESP8285, USB is connected to ESP8285's uart
+
+  Flashing ESP8285:
+  - Board: Generic ESP8266 Module
+  - Reset Method: dtr (aka modemcu)
 */
 
 //-------------------------------------------------------

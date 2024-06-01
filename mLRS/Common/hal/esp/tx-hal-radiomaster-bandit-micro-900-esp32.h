@@ -6,6 +6,12 @@
 // hal
 //*******************************************************
 
+/*
+  Flashing ESP8285:
+  - put Tx module into FLASH_ESP mode
+  - Board: Generic ESP8266 Module
+  - Reset Method: no dtr (aka ck)
+*/
 
 //-------------------------------------------------------
 // ESP32, ELRS RADIOMASTER BANDIT MICRO 900 TX
