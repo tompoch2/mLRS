@@ -149,6 +149,7 @@ static const uint8_t ssd1306_initstream[] = {
     0x81, 0xCF,   // Contrast Control
     0xD9, 0xF1,   // Pre-charge Period
     0xDB, 0x40,   // VCOMH Deselect Level
+    0x2E,         // Deactivate scroll // added 31.5.2024
     0xA4,         // Entire Display ON
     0xA6,         // Normal/Inverse Display
     0xAF,         // Display ON
@@ -174,7 +175,9 @@ void ssd1306_cmd2(uint8_t _cmd, uint8_t _data)
 void ssd1306_cmdhome(void)
 {
     uint8_t cmd[6] = {0x21, 0, 127, 0x22, 0, 7};
-    i2c_put_blocked(SSD1306_CMD, cmd, 6);
+//    i2c_put_blocked(SSD1306_CMD, cmd, 6);
+    i2c_put_blocked(SSD1306_CMD, cmd + 0, 3);
+    i2c_put_blocked(SSD1306_CMD, cmd + 3, 3);
 }
 
 
