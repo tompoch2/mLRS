@@ -37,7 +37,7 @@ uint16_t crc;
 
     if (payload_len > FRAME_TX_PAYLOAD_LEN) payload_len = FRAME_TX_PAYLOAD_LEN; // should never occur, but play it safe
 
-    memset(frame, 0, sizeof(tTxFrame));
+    memset((uint8_t*)frame, 0, sizeof(tTxFrame));
 
     // generate header
     frame->sync_word = Config.FrameSyncWord;
@@ -163,7 +163,7 @@ uint16_t crc;
 
     if (payload_len > FRAME_RX_PAYLOAD_LEN) payload_len = FRAME_RX_PAYLOAD_LEN; // should never occur, but play it safe
 
-    memset(frame, 0, sizeof(tRxFrame));
+    memset((uint8_t*)frame, 0, sizeof(tRxFrame));
 
     frame->sync_word = Config.FrameSyncWord;
     frame->status.seq_no = frame_stats->seq_no;
@@ -332,17 +332,6 @@ tTxCmdFrameRxParams rx_params = {};
 
 #endif
 #ifdef DEVICE_IS_RECEIVER
-
-// Rx: send cmd to Tx
-void pack_rxcmdframe_cmd(tRxFrame* frame, tFrameStats* frame_stats, uint8_t cmd)
-{
-uint8_t payload[1];
-
-    payload[0] = cmd;
-
-    _pack_rxframe_w_type(frame, FRAME_TYPE_TX_RX_CMD, frame_stats, payload, 1);
-}
-
 
 // Rx: send FRAME_CMD_RX_SETUPDATA to Tx
 void pack_rxcmdframe_rxsetupdata(tRxFrame* frame, tFrameStats* frame_stats)
