@@ -215,7 +215,7 @@ void tWhileTransmit::handle_once(void)
 }
 
 
-void WhileTransmit::handle(void)
+void tWhileTransmit::handle(void)
 {
 #ifdef USE_DISPLAY
     disp.SpinI2C();
