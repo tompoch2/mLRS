@@ -63,7 +63,11 @@ void (*uart_tc_callback_ptr)(void) = &uart_tc_callback_dummy;
 #define UART_RX_CALLBACK_FULL(c)    (*uart_rx_callback_ptr)(c)
 #define UART_TC_CALLBACK()          (*uart_tc_callback_ptr)()
 
+#if defined ESP8266 || defined ESP32
+#include "../Common/esp-lib/esp-uart-forjrpin5.h"
+#else
 #include "../modules/stm32ll-lib/src/stdstm32-uart.h"
+#endif
 
 // not available in stdstm32-uart.h, used for half-duplex mode
 void uart_tx_putc_totxbuf(char c)

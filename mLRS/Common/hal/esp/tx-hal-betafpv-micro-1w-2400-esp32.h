@@ -58,11 +58,12 @@
 
 
 //#define DEVICE_HAS_JRPIN5
-//#define DEVICE_HAS_IN
-#define DEVICE_HAS_SERIAL_OR_COM // board has UART which is shared between Serial or Com, selected by e.g. a switch
-//#define DEVICE_HAS_NO_SERIAL
-//#define DEVICE_HAS_NO_COM
-#define DEVICE_HAS_NO_DEBUG
+//#define DEVICE_HAS_IN //for some reason sbus inv blocks the 5 way button
+#define DEVICE_HAS_IN_INVERTED
+//#define DEVICE_HAS_SERIAL_OR_COM // board has UART which is shared between Serial or Com, selected by e.g. a switch
+#define DEVICE_HAS_NO_SERIAL
+#define DEVICE_HAS_NO_COM
+//#define DEVICE_HAS_NO_DEBUG
 
 #define DEVICE_HAS_I2C_DISPLAY_ROT180
 #define DEVICE_HAS_FIVEWAY
@@ -86,6 +87,13 @@
 #define UARTC_BAUD                115200
 #define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
 #define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
+
+#define UARTE_USE_SERIAL1 // in port is on P13
+#define UARTE_BAUD                100000 // SBus normal baud rate, is being set later anyhow
+#define UARTE_USE_TX_IO           -1     // no Tx pin needed
+#define UARTE_USE_RX_IO           13
+#define UARTE_TXBUFSIZE           0 // not used
+#define UARTE_RXBUFSIZE           512
 
 #define UARTF_USE_SERIAL // debug
 #define UARTF_BAUD                115200
@@ -144,6 +152,24 @@ void sx_dio_init_exti_isroff(void)
 }
 
 void sx_dio_exti_isr_clearflag(void) {}
+
+
+//-- In port
+#if defined DEVICE_HAS_IN || defined DEVICE_HAS_IN_INVERTED
+#include "../../esp-lib/esp-uarte.h"
+
+void in_init_gpio(void) {}
+
+void in_set_normal(void)
+{
+    uart_set_line_inverse(UARTE_SERIAL_NO, UART_SIGNAL_INV_DISABLE);
+}
+
+void in_set_inverted(void)
+{
+    uart_set_line_inverse(UARTE_SERIAL_NO, UART_SIGNAL_RXD_INV);
+}
+#endif
 
 
 //-- Button

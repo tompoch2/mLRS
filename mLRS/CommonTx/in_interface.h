@@ -21,8 +21,13 @@
 // Interface Implementation
 
 #if !(defined DEVICE_HAS_IN_ON_JRPIN5_RX || defined DEVICE_HAS_IN_ON_JRPIN5_TX)
+// DEVICE_HAS_IN or DEVICE_HAS_IN_NORMAL or DEVICE_HAS_IN_INVERTED
 
+#if defined ESP8266 || defined ESP32
+#include "../Common/esp-lib/esp-uarte.h"
+#else
 #include "../modules/stm32ll-lib/src/stdstm32-uarte.h"
+#endif
 
 
 class tIn : public tInBase
@@ -68,7 +73,9 @@ class tIn : public tInBase
     char getc(void) override { return uarte_getc(); }
 };
 
-#else // DEVICE_HAS_IN_ON_JRPIN5_RX or DEVICE_HAS_IN_ON_JRPIN5_TX
+
+#else
+// DEVICE_HAS_IN_ON_JRPIN5_RX or DEVICE_HAS_IN_ON_JRPIN5_TX
 
 #include "jr_pin5_interface.h" // in case DEVICE_HAS_JRPIN5 was not defined
 
@@ -151,19 +158,20 @@ class tIn : public tInBase
     }
 };
 
+
 #endif
 
-tIn in;
-
-
 #else
+// !defined USE_IN
 
 class tIn : public tInBase
 {
 };
 
+#endif // if (defined USE_IN)
+
+
 tIn in;
 
-#endif // if (defined USE_IN)
 
 #endif // IN_INTERFACE_H

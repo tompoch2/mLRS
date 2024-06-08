@@ -5,6 +5,10 @@
 //*******************************************************
 // ESP UARTD
 //********************************************************
+// For ESP32:
+// usefull resource
+// - https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/uart.html
+//********************************************************
 #ifndef ESPLIB_UARTD_H
 #define ESPLIB_UARTD_H
 
@@ -136,12 +140,6 @@ IRAM_ATTR uint16_t uartd_rx_available(void)
 }
 
 
-IRAM_ATTR uint8_t uartd_has_systemboot(void)
-{
-    return 0;  // ESP8266, ESP32 can't reboot into system bootloader
-}
-
-
 //-------------------------------------------------------
 // INIT routines
 //-------------------------------------------------------
@@ -191,7 +189,6 @@ void _uartd_initit(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbit
     ESP_ERROR_CHECK(uart_set_rx_full_threshold(UARTD_SERIAL_NO, 8)); // default is 120 which is too much, buffer only 128 bytes
     ESP_ERROR_CHECK(uart_set_rx_timeout(UARTD_SERIAL_NO, 1)); // wait for 1 symbol (~11 bits) to trigger Rx ISR, default 2
 
-
 #elif defined ESP8266
     UARTD_SERIAL_NO.setRxBufferSize(UARTD_RXBUFSIZE);
     UARTD_SERIAL_NO.begin(baud);
@@ -221,6 +218,21 @@ void uartd_setprotocol(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM sto
 }
 
 
+void uartd_tx_enablepin(FunctionalState flag) {} // not supported
+
+
+void uartd_rx_enableisr(FunctionalState flag) 
+{
+#ifdef ESP32
+    if (flag == ENABLE) {
+        ESP_ERROR_CHECK(uart_enable_rx_intr(UARTD_SERIAL_NO));    
+    } else {
+        ESP_ERROR_CHECK(uart_disable_rx_intr(UARTD_SERIAL_NO));    
+    }
+#endif    
+}
+
+
 void uartd_init(void)
 {
 #ifdef ESP32
@@ -231,6 +243,7 @@ void uartd_init(void)
     _uartd_initit(UARTD_BAUD, XUART_PARITY_NO, UART_STOPBIT_1);
 }
 
+
 void uartd_init_isroff(void)
 {
 #ifdef ESP32
@@ -239,6 +252,17 @@ void uartd_init_isroff(void)
     UARTD_SERIAL_NO.end();
 #endif
     _uartd_initit(UARTD_BAUD, XUART_PARITY_NO, UART_STOPBIT_1);
+}
+
+
+//-------------------------------------------------------
+// System bootloader
+//-------------------------------------------------------
+// ESP8266, ESP32 can't reboot into system bootloader
+  
+IRAM_ATTR uint8_t uartd_has_systemboot(void)
+{
+    return 0;
 }
 
 
