@@ -17,6 +17,10 @@
 #include "hal/uart_ll.h"
 #endif
 
+
+//-------------------------------------------------------
+// Enums
+//-------------------------------------------------------
 #ifndef ESPLIB_UART_ENUMS
 #define ESPLIB_UART_ENUMS
 
@@ -34,6 +38,10 @@ typedef enum {
 
 #endif
 
+
+//-------------------------------------------------------
+// Defines
+//-------------------------------------------------------
 
 #ifdef UART$_USE_SERIAL
   #ifdef ESP32
@@ -74,6 +82,10 @@ typedef enum {
 #endif
 
 
+//-------------------------------------------------------
+// TX routines
+//-------------------------------------------------------
+
 IRAM_ATTR void uart$_putbuf(uint8_t* buf, uint16_t len)
 {
 #ifdef ESP32
@@ -83,6 +95,20 @@ IRAM_ATTR void uart$_putbuf(uint8_t* buf, uint16_t len)
 #endif
 }
 
+
+IRAM_ATTR void uart$_tx_flush(void)
+{
+#ifdef ESP32
+    // flush of tx buffer not available
+#elif defined ESP8266
+    UART$_SERIAL_NO.flush();
+#endif
+}
+
+
+//-------------------------------------------------------
+// RX routines
+//-------------------------------------------------------
 
 IRAM_ATTR char uart$_getc(void)
 {
@@ -102,16 +128,6 @@ IRAM_ATTR void uart$_rx_flush(void)
     uart_flush(UART$_SERIAL_NO);
 #elif defined ESP8266
     while (UART$_SERIAL_NO.available() > 0) UART$_SERIAL_NO.read();
-#endif
-}
-
-
-IRAM_ATTR void uart$_tx_flush(void)
-{
-#ifdef ESP32
-    // flush of tx buffer not available
-#elif defined ESP8266
-    UART$_SERIAL_NO.flush();
 #endif
 }
 
@@ -169,7 +185,7 @@ void _uart$_initit(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbit
             _stopbits = UART_STOP_BITS_2; break;
     }
 
-    uart_config_t uart_config = {
+    uart_config_t config = {
         .baud_rate  = (int)baud,
         .data_bits  = UART_DATA_8_BITS,
         .parity     = _parity,
@@ -177,7 +193,7 @@ void _uart$_initit(uint32_t baud, UARTPARITYENUM parity, UARTSTOPBITENUM stopbit
         .flow_ctrl  = UART_HW_FLOWCTRL_DISABLE,
     };
 
-    ESP_ERROR_CHECK(uart_param_config(UART$_SERIAL_NO, &uart_config));
+    ESP_ERROR_CHECK(uart_param_config(UART$_SERIAL_NO, &config));
 
 #if defined UART$_USE_TX_IO || defined UART$_USE_RX_IO // both need to be defined
     ESP_ERROR_CHECK(uart_set_pin(UART$_SERIAL_NO, UART$_USE_TX_IO, UART$_USE_RX_IO, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
@@ -233,7 +249,7 @@ void uart$_rx_enableisr(FunctionalState flag)
 }
 
 
-void uart$_init(void)
+void uart$_init_isroff(void)
 {
 #ifdef ESP32
     ESP_ERROR_CHECK(uart_driver_delete(UART$_SERIAL_NO));
@@ -244,14 +260,10 @@ void uart$_init(void)
 }
 
 
-void uart$_init_isroff(void)
+void uart$_init(void)
 {
-#ifdef ESP32
-    ESP_ERROR_CHECK(uart_driver_delete(UART$_SERIAL_NO));
-#elif defined ESP8266
-    UART$_SERIAL_NO.end();
-#endif
-    _uart$_initit(UART$_BAUD, XUART_PARITY_NO, UART_STOPBIT_1);
+    uart$_init_isroff();
+    // isr is enabled !    
 }
 
 
