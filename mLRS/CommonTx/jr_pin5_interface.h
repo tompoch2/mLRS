@@ -64,10 +64,14 @@ void (*uart_tc_callback_ptr)(void) = &uart_tc_callback_dummy;
 #define UART_TC_CALLBACK()          (*uart_tc_callback_ptr)()
 
 #if defined ESP8266 || defined ESP32
-#include "../Common/esp-lib/esp-uart-forjrpin5.h"
+#include "../Common/esp-lib/esp-uart-forjrpin5-isr.h"
+
+void uart_tx_putc_totxbuf(char c) {}
+void uart_tx_start(void) {}
+//void uart_rx_putc_torxbuf(uint8_t c) // should not be needed void
+
 #else
 #include "../modules/stm32ll-lib/src/stdstm32-uart.h"
-#endif
 
 // not available in stdstm32-uart.h, used for half-duplex mode
 void uart_tx_putc_totxbuf(char c)
@@ -94,6 +98,7 @@ void uart_rx_putc_torxbuf(uint8_t c)
         uart_rxwritepos = next;
     }
 }
+#endif
 
 
 class tPin5BridgeBase
@@ -248,7 +253,10 @@ void tPin5BridgeBase::Init(void)
 
 void tPin5BridgeBase::TelemetryStart(void)
 {
+#if defined ESP8266 || defined ESP32
+#else
     telemetry_start_next_tick = true;
+#endif    
 }
 
 
@@ -317,7 +325,7 @@ void tPin5BridgeBase::pin5_tx_enable(bool enable_flag)
 // the logic analyzer shows this gives a 30-35 us gap nevertheless, which is perfect
 
 void tPin5BridgeBase::uart_rx_callback(uint8_t c)
-{
+{/*
     parse_nextchar(c);
 
     if (state < STATE_TRANSMIT_START) return; // we are in receiving
@@ -326,7 +334,10 @@ void tPin5BridgeBase::uart_rx_callback(uint8_t c)
         state = STATE_IDLE;
         return;
     }
-
+*/
+#if defined ESP8266 || defined ESP32
+    state = STATE_IDLE;
+#else
     if (transmit_start()) { // check if a transmission waits, put it into buf and return true to start
         pin5_tx_enable(true);
         state = STATE_TRANSMITING;
@@ -334,12 +345,16 @@ void tPin5BridgeBase::uart_rx_callback(uint8_t c)
     } else {
         state = STATE_IDLE;
     }
+#endif
 }
 
 
 void tPin5BridgeBase::uart_tc_callback(void)
 {
+#if defined ESP8266 || defined ESP32
+#else
     pin5_tx_enable(false); // switches on rx
+#endif
     state = STATE_IDLE;
 }
 
@@ -354,6 +369,9 @@ void tPin5BridgeBase::uart_tc_callback(void)
 
 void tPin5BridgeBase::CheckAndRescue(void)
 {
+#if defined ESP8266 || defined ESP32
+#else
+
     uint32_t tnow_ms = millis32();
 
     if (state < STATE_TRANSMITING) {
@@ -372,6 +390,7 @@ void tPin5BridgeBase::CheckAndRescue(void)
             LL_USART_ClearFlag_TC(UART_UARTx);
         }
     }
+#endif
 }
 
 

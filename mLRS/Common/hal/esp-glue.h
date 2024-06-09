@@ -40,6 +40,11 @@ typedef enum
 } HAL_StatusTypeDef;
 
 
+#define __REV16(x)  __builtin_bswap16(x)
+#define __REVSH(x)  __builtin_bswap16(x)
+#define __REV(x)    __builtin_bswap32(x)
+
+
 // setup(), loop() streamlining between Arduino/STM code
 static uint8_t restart_controller = 0;
 void setup() {}

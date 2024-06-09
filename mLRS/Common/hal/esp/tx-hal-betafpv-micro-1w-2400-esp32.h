@@ -57,13 +57,13 @@
 */
 
 
-//#define DEVICE_HAS_JRPIN5
+#define DEVICE_HAS_JRPIN5
 //#define DEVICE_HAS_IN //for some reason sbus inv blocks the 5 way button
 //#define DEVICE_HAS_IN_INVERTED
-#define DEVICE_HAS_SERIAL_OR_COM // board has UART which is shared between Serial or Com, selected by e.g. a switch
-//#define DEVICE_HAS_NO_SERIAL
-//#define DEVICE_HAS_NO_COM
-#define DEVICE_HAS_NO_DEBUG
+//#define DEVICE_HAS_SERIAL_OR_COM // board has UART which is shared between Serial or Com, selected by e.g. a switch
+#define DEVICE_HAS_NO_SERIAL
+#define DEVICE_HAS_NO_COM
+//#define DEVICE_HAS_NO_DEBUG
 
 #define DEVICE_HAS_I2C_DISPLAY_ROT180
 #define DEVICE_HAS_FIVEWAY
@@ -88,9 +88,16 @@
 #define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
 #define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
 
+#define UART_USE_SERIAL1 // JR pin5, MBridge, is on P13
+#define UART_BAUD                 400000
+#define UARTE_USE_TX_IO           -1 // no Tx pin needed
+#define UARTE_USE_RX_IO           13
+#define UART_TXBUFSIZE            512 //0 // 128 fifo should be sufficient // 512
+#define UART_RXBUFSIZE            512
+
 #define UARTE_USE_SERIAL1 // in port is on P13
 #define UARTE_BAUD                100000 // SBus normal baud rate, is being set later anyhow
-#define UARTE_USE_TX_IO           -1     // no Tx pin needed
+#define UARTE_USE_TX_IO           -1 // no Tx pin needed
 #define UARTE_USE_RX_IO           13
 #define UARTE_TXBUFSIZE           0 // not used
 #define UARTE_RXBUFSIZE           512
