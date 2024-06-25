@@ -7,27 +7,49 @@
 //********************************************************
 
 //-------------------------------------------------------
-// ESP32, ELRS GENERIC 2400 True Diversity PA RX
+// ESP32, ELRS RadioMaster RP4TD 2400 Receiver as TX, can only do SiK
 //-------------------------------------------------------
 
 #define DEVICE_HAS_SINGLE_LED_RGB
 #define DEVICE_HAS_DIVERSITY_SINGLE_SPI // must be set, doesn't work without it
+//#define DEVICE_HAS_IN
+//#define DEVICE_HAS_NO_COM
 #define DEVICE_HAS_NO_DEBUG
-//#define DEVICE_HAS_SERIAL_OR_DEBUG
+//#define DEVICE_HAS_NO_SERIAL
 
 
 //-- UARTS
 // UARTB = serial port
-// UART = output port, SBus or whatever
-// UARTC = debug port
+// UARTC or USB = COM (CLI)
+// UARTD = -
+// UART  = JR bay pin5
+// UARTE = in port, SBus or whatever
+// UARTF = debug port
 
-#define UARTB_USE_SERIAL
-#define UARTB_BAUD                RX_SERIAL_BAUDRATE
-#define UARTB_TXBUFSIZE           RX_SERIAL_TXBUFSIZE
-#define UARTB_RXBUFSIZE           RX_SERIAL_RXBUFSIZE
+#define UARTB_USE_SERIAL // serial port
+#define UARTB_BAUD                TX_SERIAL_BAUDRATE
+#define UARTB_TXBUFSIZE           1024 // TX_SERIAL_TXBUFSIZE
+#define UARTB_RXBUFSIZE           TX_SERIAL_RXBUFSIZE
 
-#define UARTC_USE_SERIAL
+#define UARTC_USE_SERIAL1 // COM (CLI)
 #define UARTC_BAUD                115200
+#define UARTC_USE_TX_IO           IO_P18 
+#define UARTC_USE_RX_IO           5
+#define UARTC_TXBUFSIZE           0 // ?? // TX_COM_TXBUFSIZE
+#define UARTC_RXBUFSIZE           TX_COM_RXBUFSIZE
+
+#define UARTE_USE_SERIAL1 // in
+#define UARTE_BAUD                100000 // SBus normal baud rate, is being set later anyhow
+#define UARTE_USE_TX_IO           -1 // no Tx pin needed
+#define UARTE_USE_RX_IO           IO_P18
+#define UARTE_TXBUFSIZE           0 // not used
+#define UARTE_RXBUFSIZE           512
+
+#define UARTF_USE_SERIAL1 // debug
+#define UARTF_BAUD                115200
+#define UARTF_USE_TX_IO           IO_P18 
+#define UARTF_USE_RX_IO           -1
+#define UARTF_TXBUFSIZE           0 // ?? // 512
 
 
 //-- SX1: SX12xx & SPI
@@ -71,17 +93,17 @@ IRAM_ATTR void sx_amp_receive(void)
     gpio_high(SX_RX_EN);
 }
 
-void sx_dio_init_exti_isroff(void)
-{
-    detachInterrupt(SX_DIO1);
-}
-
 void sx_dio_enable_exti_isr(void)
 {
     attachInterrupt(SX_DIO1, SX_DIO_EXTI_IRQHandler, RISING);
 }
 
-IRAM_ATTR void sx_dio_exti_isr_clearflag(void) {}
+void sx_dio_init_exti_isroff(void)
+{
+    detachInterrupt(SX_DIO1);
+}
+
+void sx_dio_exti_isr_clearflag(void) {}
 
 
 //-- SX2: SX12xx & SPI
@@ -240,7 +262,6 @@ IRAM_ATTR void led_blue_toggle(void)
 
 
 //-- POWER
-#ifndef POWER_OVERLAY
 
 #define POWER_GAIN_DBM            18 // gain of a PA stage if present
 #define POWER_SX1280_MAX_DBM      SX1280_POWER_3_DBM  // maximum allowed sx power
@@ -253,5 +274,3 @@ const rfpower_t rfpower_list[] = {
     { .dbm = POWER_10_DBM, .mW = 10 },
     { .dbm = POWER_20_DBM, .mW = 100 },
 };
-
-#endif // !POWER_OVERLAY
