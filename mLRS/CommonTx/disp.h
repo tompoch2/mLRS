@@ -41,6 +41,7 @@ extern bool connected(void);
 extern bool connected_and_rx_setup_available(void);
 extern tStats stats;
 extern tGDisplay gdisp;
+void i2c_spin(uint16_t chunksize);
 
 
 #define DISP_START_TMO_MS       SYSTICK_DELAY_MS(500)
@@ -114,6 +115,8 @@ class tTxDisp
     uint8_t Task(void);
     void DrawNotify(const char* s);
     void DrawBoot(void);
+
+    void SpinI2C(void);
 
     typedef struct {
         uint8_t list[SETUP_PARAMETER_NUM];
@@ -497,6 +500,7 @@ void tTxDisp::DrawNotify(const char* s)
     draw_page_notify(s);
     gdisp_update();
     page_modified = false;
+    i2c_spin(GDISPLAY_BUFSIZE); // needed for ESP32 // always draw it directly to the buffer
 }
 
 
@@ -542,6 +546,12 @@ void tTxDisp::Draw(void)
 //t2 = micros16(); //HAL_GetTick();
 //dbg.puts("\nupda ");dbg.puts(u16toBCD_s(t1));dbg.puts(" , ");dbg.puts(u16toBCD_s(t2-t1));
     }
+}
+
+
+void tTxDisp::SpinI2C(void)
+{
+    i2c_spin(64); // for timing on ESP32 see below
 }
 
 
@@ -1183,5 +1193,12 @@ FRM303 F072 48 MHz
   further optimization
   - no gdisp_u_() in gdisp_setpixel_()
   - func ptr for gdisp_setpixel_()
+
+31.05.2024:
+  timing on ESP32:
+    1024: 10.1 ms
+    256:   2.6 ms
+    128:   1.35 ms
+    64:    0.72 ms
 */
 
