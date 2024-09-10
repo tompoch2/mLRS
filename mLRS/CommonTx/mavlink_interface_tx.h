@@ -547,6 +547,7 @@ uint32_t bindphrase_u32;
 // we don't put it in flash but ram, since some pointers need to be modified on init
 fmav_param_entry_t fmav_param_list[] = {
     { (uint8_t*)&(pstore_u8), MAV_PARAM_TYPE_UINT8, "PSTORE" },
+    { (uint8_t*)&(Setup._ConfigId), MAV_PARAM_TYPE_UINT8, "CONFIG ID" }, // we don't use config_id class here
     { (uint32_t*)&(bindphrase_u32), MAV_PARAM_TYPE_UINT32, "BIND_PHRASE_U32" },
     #define X(p,t, n,mn, d,mi,ma,u, s, amp) { \
             .ptr = (t*)&(p), \
@@ -559,10 +560,10 @@ fmav_param_entry_t fmav_param_list[] = {
 };
 
 #define MAV_PARAM_PSTORE_IDX      0
-#define MAV_PARAM_BINDPHRASE_IDX  1
+#define MAV_PARAM_BINDPHRASE_IDX  2
 
 #define FASTMAVLINK_PARAM_NUM     sizeof(fmav_param_list)/sizeof(fmav_param_entry_t)
-STATIC_ASSERT(FASTMAVLINK_PARAM_NUM == SETUP_PARAMETER_NUM + 1, "FASTMAVLINK_PARAM_NUM missmatch")
+STATIC_ASSERT(FASTMAVLINK_PARAM_NUM == SETUP_PARAMETER_NUM + MAV_PARAM_BINDPHRASE_IDX, "FASTMAVLINK_PARAM_NUM missmatch")
 #include "../Common/mavlink/out/lib/fastmavlink_parameters.h"
 
 
@@ -631,7 +632,7 @@ void tTxMavlink::generate_cmd_ack(uint16_t cmd, uint8_t res, uint8_t sysid, uint
 void tTxMavlink::generate_param_value(uint16_t param_idx)
 {
     // if BIND_PHRASE_U32, then do special handling, get bind_phrase_u32 from bind_phrase
-    if (param_idx == 0) {
+    if (param_idx == MAV_PARAM_BINDPHRASE_IDX) {
         bindphrase_u32 = u32_from_bindphrase(Setup.Common[Config.ConfigId].BindPhrase);
     }
 
@@ -687,7 +688,7 @@ void tTxMavlink::component_handle_msg(fmav_message_t* const msg)
                     Setup.Rx.SerialLinkMode = SERIAL_LINK_MODE_MAVLINK;
                 }
                 // if BIND_PHRASE_U32 do special handling
-                if (param_idx == 0) {
+                if (param_idx == MAV_PARAM_BINDPHRASE_IDX) {
                     bindphrase_from_u32(Setup.Common[Config.ConfigId].BindPhrase, bindphrase_u32);
                 }
                 // if PSTORE invoke paramstore
@@ -858,8 +859,11 @@ void tTxMavlink::component_init(void)
 
     pstore_u8 = 0;
     bindphrase_u32 = u32_from_bindphrase(Setup.Common[Config.ConfigId].BindPhrase);
-    for (uint8_t idx = MAV_PARAM_BINDPHRASE_IDX + 1; idx < SETUP_PARAMETER_NUM; idx++) {
-        fmav_param_list[idx].ptr = SetupParameterPtr(idx);
+    // set pointers, taking into account ConfigId
+    // idx points into SetupParameter[], not fmav_param_list
+    // all extra parameters need to come before bind phrase
+    for (uint8_t idx = MAV_PARAM_BINDPHRASE_IDX; idx < SETUP_PARAMETER_NUM; idx++) {
+        fmav_param_list[MAV_PARAM_BINDPHRASE_IDX + idx].ptr = SetupParameterPtr(idx);
     }
 }
 

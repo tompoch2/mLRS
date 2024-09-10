@@ -18,11 +18,10 @@
 #define CLOCK_IRQ_PRIORITY          10
 #define UARTB_IRQ_PRIORITY          11 // serial
 #define UART_IRQ_PRIORITY           12 // out pin
-#define UARTC_IRQ_PRIORITY          11 // debug
+#define UARTF_IRQ_PRIORITY          11 // debug
 #define SX_DIO_EXTI_IRQ_PRIORITY    13
 #define SX2_DIO_EXTI_IRQ_PRIORITY   13 // on single spi diversity systems must be equal to DIO priority
 #define SWUART_TIM_IRQ_PRIORITY      9 // debug on swuart
-#define BUZZER_TIM_IRQ_PRIORITY     14
 
 #include "../Common/common_conf.h"
 #include "../Common/common_types.h"
@@ -45,7 +44,7 @@
 #ifdef DEVICE_HAS_DEBUG_SWUART
 #include "../Common/esp-lib/esp-uart-sw.h"
 #else
-#include "../Common/esp-lib/esp-uartc.h"
+#include "../Common/esp-lib/esp-uartf.h"
 #endif
 #endif
 #include "../Common/hal/esp-timer.h"
@@ -77,7 +76,7 @@
 #ifdef DEVICE_HAS_DEBUG_SWUART
 #include "../modules/stm32ll-lib/src/stdstm32-uart-sw.h"
 #else
-#include "../modules/stm32ll-lib/src/stdstm32-uartc.h"
+#include "../modules/stm32ll-lib/src/stdstm32-uartf.h"
 #endif
 #endif
 #ifdef USE_I2C
@@ -590,6 +589,7 @@ INITCONTROLLER_END
         DECc(tick_1hz, SYSTICK_DELAY_MS(1000));
 
         if (!connect_occured_once) bind.AutoBind();
+        bind.Tick_ms();
         fan.Tick_ms();
 
         if (!tick_1hz) {
