@@ -219,12 +219,15 @@ HAL_StatusTypeDef ssd1306_put(uint8_t* buf, uint16_t len)
 } */
 
 
+#if !(defined ESP8266 || defined ESP32)
 HAL_StatusTypeDef ssd1306_put_noblock(uint8_t* const buf, uint16_t len)
 {
-#if !(defined ESP8266 || defined ESP32)
     ssd1306_cmdhome();
     return i2c_put(SSD1306_DATA, buf, len);
+}
 #else
+HAL_StatusTypeDef ssd1306_put_noblock(uint8_t* buf, uint16_t len)
+{
     HAL_StatusTypeDef ret = HAL_OK;
     uint8_t page = 0;
     while ((len > 0) && (ret == HAL_OK)) {
@@ -236,8 +239,8 @@ HAL_StatusTypeDef ssd1306_put_noblock(uint8_t* const buf, uint16_t len)
         len -= 128;
     }
     return ret;
-#endif
 }
+#endif
 
 
 //-------------------------------------------------------
